@@ -105,17 +105,24 @@ const ProductModel = {
   },
 
   // ✅ Add Product (with SKU Encryption & Unique Check)
-  addProduct: async (SKU, product_name, category_name, materials, price) => {
+  addProduct: async (
+    SKU,
+    product_name,
+    category_name,
+    materials,
+    price,
+    media_url
+  ) => {
     const encryptedSKU = encryptSKU(SKU);
 
     const connection = await db.getConnection(); // Start transaction
     await connection.beginTransaction();
 
     try {
-      //   // ✅ Fetch all SKUs from the database
+      // ✅ Fetch all SKUs from the database
       const [existingSKUs] = await db.execute("SELECT SKU FROM product");
 
-      //   // ✅ Check if the encrypted SKU exists in the database
+      // ✅ Check if the encrypted SKU exists in the database
       const skuExists = existingSKUs.some((row) => row.SKU === encryptedSKU);
 
       if (skuExists) {
@@ -171,11 +178,11 @@ const ProductModel = {
       }
 
       // 🔹 Step 4: Insert Product
-      const insertQuery = `
+      const insertProductQuery = `
         INSERT INTO product (SKU, product_name, category_id, material_ids, price)
         VALUES (?, ?, ?, ?, ?)
       `;
-      await connection.execute(insertQuery, [
+      const [productResult] = await connection.execute(insertProductQuery, [
         encryptedSKU,
         product_name,
         category_id,
@@ -183,16 +190,33 @@ const ProductModel = {
         price,
       ]);
 
-      await connection.commit(); // Commit transaction
+      const product_id = productResult.insertId; // Get inserted product_id
+
+      // 🔹 Step 5: Insert Media URL (if provided)
+      if (media_url) {
+        const insertMediaQuery = `
+          INSERT INTO product_media (product_id, url)
+          VALUES (?, ?)
+        `;
+        await connection.execute(insertMediaQuery, [product_id, media_url]);
+      } else {
+        const insertMediaQuery = `
+          INSERT INTO product_media (product_id, url)
+          VALUES (?, NULL)
+        `;
+        await connection.execute(insertMediaQuery, [product_id]);
+      }
+
+      await connection.commit(); // ✅ Commit transaction
       return { message: "Product added successfully" };
     } catch (error) {
-      await connection.rollback(); // Rollback transaction on error
+      await connection.rollback(); // ❌ Rollback transaction on error
       throw error;
     } finally {
       connection.release();
     }
   },
-  
+
   // ✅ Delete Product
   deleteProduct: async (product_id) => {
     const deleteQuery = "DELETE FROM product WHERE product_id = ?";
