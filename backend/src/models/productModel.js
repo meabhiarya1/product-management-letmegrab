@@ -63,6 +63,15 @@ const ProductModel = {
         )
       `);
 
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS user (
+          user_id INT AUTO_INCREMENT PRIMARY KEY,
+          email VARCHAR(255) NOT NULL UNIQUE,
+          password VARCHAR(255) NOT NULL,
+          role ENUM('admin', 'user') NOT NULL DEFAULT 'user'
+        )
+      `);
+
       console.log("✅ All tables created successfully!");
     } catch (error) {
       console.error("❌ Error creating schema or tables:", error);
@@ -276,7 +285,7 @@ const ProductModel = {
   ) => {
     const connection = await db.getConnection(); // Start transaction
     await connection.beginTransaction();
-  
+
     try {
       // Update product details
       const updateProductQuery = `
@@ -284,7 +293,7 @@ const ProductModel = {
         SET product_name = ?, category_id = ?, material_ids = ?, price = ?
         WHERE product_id = ?
       `;
-  
+
       const [productResult] = await connection.execute(updateProductQuery, [
         product_name,
         category_id,
@@ -292,19 +301,19 @@ const ProductModel = {
         price,
         product_id,
       ]);
-  
+
       // ✅ Check if the update was successful
       if (productResult.affectedRows === 0) {
         throw new Error("Product not found or no changes made");
       }
-  
+
       // ✅ Insert or update media_url in the product_media table
       if (media_url) {
         const checkMediaQuery = `SELECT * FROM product_media WHERE product_id = ?`;
         const [mediaResult] = await connection.execute(checkMediaQuery, [
           product_id,
         ]);
-  
+
         if (mediaResult.length > 0) {
           // ✅ Update existing media URL
           const updateMediaQuery = `
@@ -322,7 +331,7 @@ const ProductModel = {
           await connection.execute(insertMediaQuery, [product_id, media_url]);
         }
       }
-  
+
       await connection.commit(); // ✅ Commit transaction
       return { message: "Product updated successfully" };
     } catch (error) {
@@ -331,7 +340,7 @@ const ProductModel = {
     } finally {
       connection.release(); // ✅ Release connection back to the pool
     }
-  },  
+  },
 
   // ✅ Get Statistics (Category-wise Highest Price)
   getCategoryWiseHighestPrice: async () => {
