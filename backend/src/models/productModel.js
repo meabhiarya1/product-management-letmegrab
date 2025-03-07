@@ -70,39 +70,55 @@ const ProductModel = {
     }
   },
 
-  // ✅ Get All Products with Pagination & Filters
+  // // ✅ Get All Products with Pagination & Filters
   getProducts: async (page, limit, filters) => {
-    const offset = (page - 1) * limit;
-    let query = `SELECT * FROM product WHERE 1=1`; // Base query
+    try {
+      const offset = (page - 1) * limit;
+      let query = `SELECT * FROM product WHERE 1=1`;
 
-    const params = [];
+      if (filters.SKU) {
+        query += ` AND SKU LIKE ${db.escape("%" + filters.SKU + "%")}`;
+      }
+      if (filters.product_name) {
+        query += ` AND product_name LIKE ${db.escape(
+          "%" + filters.product_name + "%"
+        )}`;
+      }
+      if (filters.category_id) {
+        query += ` AND category_id = ${db.escape(filters.category_id)}`;
+      }
+      if (filters.material_ids) {
+        if (Array.isArray(filters.material_ids)) {
+          query += ` AND (${filters.material_ids
+            .map((id) => `FIND_IN_SET(${db.escape(id)}, material_ids)`)
+            .join(" OR ")})`;
+        } else {
+          query += ` AND FIND_IN_SET(${db.escape(
+            filters.material_ids
+          )}, material_ids)`;
+        }
+      }
+      // if (filters.status) {
+      //   query += ` AND status = ${db.escape(filters.status)}`;
+      // }
 
-    if (filters.SKU) {
-      query += ` AND SKU LIKE ?`;
-      params.push(`%${filters.SKU}%`);
-    }
-    if (filters.product_name) {
-      query += ` AND product_name LIKE ?`;
-      params.push(`%${filters.product_name}%`);
-    }
-    if (filters.category_id) {
-      query += ` AND category_id = ?`;
-      params.push(filters.category_id);
-    }
-    if (filters.material_ids) {
-      query += ` AND FIND_IN_SET(?, material_ids)`;
-      params.push(filters.material_ids);
-    }
-    if (filters.status) {
-      query += ` AND status = ?`;
-      params.push(filters.status);
-    }
+      // Directly append LIMIT and OFFSET
+      const safeLimit = Number(limit) || 10;
+      const safeOffset = Number(offset) || 0;
+      query += ` LIMIT ${safeLimit} OFFSET ${safeOffset}`;
 
-    query += ` LIMIT ? OFFSET ?`;
-    params.push(+limit, +offset);
+      console.log("Executing Query:", query);
 
-    const [products] = await db.execute(query, params);
-    return products;
+      const [products] = await db.query(query);
+      console.log(
+        "Products Retrieved:",
+        products.length ? products : "No products found"
+      );
+      return products;
+    } catch (error) {
+      console.error("🚨 Database Query Error:", error);
+      throw new Error("Database query failed");
+    }
   },
 
   // ✅ Add Product (with SKU Encryption & Unique Check)

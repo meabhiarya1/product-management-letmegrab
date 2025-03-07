@@ -4,16 +4,16 @@ const ProductModel = require("../models/productModel");
 exports.getProducts = async (req, res) => {
   try {
     const {
-      page = 1,
-      limit = 10,
+      page = 2,
+      limit = 4,
       SKU,
       product_name,
       category_id,
       material_ids,
-      status,
     } = req.query;
 
-    const filters = { SKU, product_name, category_id, material_ids, status };
+    const filters = { SKU, product_name, category_id, material_ids };
+
     const products = await ProductModel.getProducts(page, limit, filters);
 
     res.status(200).json(products);
@@ -25,14 +25,8 @@ exports.getProducts = async (req, res) => {
 // ✅ Add Product
 exports.addProduct = async (req, res) => {
   try {
-    let {
-      SKU,
-      product_name,
-      category_name,
-      material_names,
-      price,
-      media_url,
-    } = req.body;
+    let { SKU, product_name, category_name, material_names, price, media_url } =
+      req.body;
 
     // ✅ Check for missing fields
     if (
