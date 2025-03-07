@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const productController = require("../controllers/productController");
+const { verifyToken } = require("../middleware/authMiddleware");
 
+router.use(verifyToken); // Applies to all routes below
 
 // ✅ Get All Products with Pagination & Filters
-router.get("/products", productController.getProducts);  //Tested
+router.get("/products", productController.getProducts); //Tested
 
 // ✅ Add a Product
 router.post("/products", productController.addProduct); //Tested
@@ -16,12 +18,21 @@ router.put("/products/:product_id", productController.updateProduct); //Tested
 router.delete("/products/:product_id", productController.deleteProduct); //Tested
 
 // ✅ Get Category-wise Highest Price Products
-router.get("/products/category-wise-highest-price", productController.getCategoryWiseHighestPrice);  //Tested
+router.get(
+  "/products/category-wise-highest-price",
+  productController.getCategoryWiseHighestPrice
+); //Tested
 
 // ✅ Get Product Count by Price Range
-router.get("/products/price-range-count", productController.getPriceRangeProductCount); //Tested
+router.get(
+  "/products/price-range-count",
+  productController.getPriceRangeProductCount
+); //Tested
 
 // ✅ Get Products Without Media
-router.get("/products/without-media", productController.getProductsWithoutMedia); //Tested
+router.get(
+  "/products/without-media",
+  productController.getProductsWithoutMedia
+); //Tested
 
 module.exports = router;
