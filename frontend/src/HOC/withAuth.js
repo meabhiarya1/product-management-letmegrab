@@ -1,19 +1,20 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
 
-const withAuth = (WrappedComponent) => {
-  return (props) => {
-    const navigate = useNavigate();
-    const isAuthenticated = !!localStorage.getItem("token"); // Check token existence
+// const withAuth = (WrappedComponent) => {
+//   return (props) => {
+//     const navigate = useNavigate();
+//     const isAuthenticated = !!localStorage.getItem("token"); // Check token existence
 
-    useEffect(() => {
-      if (!isAuthenticated) {
-        navigate("/login"); // Redirect to login if not authenticated
-      }
-    }, [isAuthenticated, navigate]);
 
-    return isAuthenticated ? <WrappedComponent {...props} /> : null;
-  };
-};
+//     useEffect(() => {
+//       if (!isAuthenticated) {
+//         navigate("/"); // Redirect to login if not authenticated
+//       }
+//     }, [isAuthenticated, navigate]);
 
-export default withAuth;
+//     return isAuthenticated ? <WrappedComponent {...props} /> : null;
+//   };
+// };
+
+// export default withAuth;
