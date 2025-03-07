@@ -25,24 +25,39 @@ exports.getProducts = async (req, res) => {
 // ✅ Add Product
 exports.addProduct = async (req, res) => {
   try {
-    const { SKU, product_name, category_name, material_names, price } =
-      req.body;
+    let {
+      SKU,
+      product_name,
+      category_name,
+      material_names,
+      price,
+      media_url,
+    } = req.body;
 
+    // ✅ Check for missing fields
     if (
       !SKU ||
       !product_name ||
       !category_name ||
       !material_names ||
-      price === undefined ||
-      !price ||
-      price === ""
+      price === undefined
     ) {
-      return res.status(400).json({ error: "All fields are required" });
+      return res
+        .status(400)
+        .json({ error: "All fields are required except media_url" });
     }
 
-    // ✅ Check for invalid price value (0 or negative)
-    if (price <= 0 || isNaN(price)) {
+    // ✅ Convert empty string `""` price to NaN for proper validation
+    price = Number(price);
+
+    // ✅ Check for invalid price value (0, negative, or non-numeric)
+    if (typeof price !== "number" || isNaN(price) || price <= 0) {
       return res.status(400).json({ error: "Invalid price value" });
+    }
+
+    // ✅ Ensure `media_url` is null if not provided
+    if (!media_url) {
+      media_url = null;
     }
 
     // Call the model function to handle category, materials, and product insertion
@@ -51,12 +66,13 @@ exports.addProduct = async (req, res) => {
       product_name,
       category_name,
       material_names,
-      price
+      price,
+      media_url
     );
 
     res.status(201).json(result);
   } catch (error) {
-    res.status(500).json({ error: error.message || "Failed to add product" });
+    res.status(400).json({ error: error.message || "Failed to add product" });
   }
 };
 

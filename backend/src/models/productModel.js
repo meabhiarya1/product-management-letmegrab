@@ -58,7 +58,7 @@ const ProductModel = {
         CREATE TABLE IF NOT EXISTS product_media (
           media_id INT AUTO_INCREMENT PRIMARY KEY,
           product_id INT NOT NULL,
-          url VARCHAR(255) NOT NULL,
+          url VARCHAR(255),
           FOREIGN KEY (product_id) REFERENCES product(product_id) ON DELETE CASCADE
         )
       `);
@@ -66,6 +66,7 @@ const ProductModel = {
       console.log("✅ All tables created successfully!");
     } catch (error) {
       console.error("❌ Error creating schema or tables:", error);
+      return error;
     }
   },
 
@@ -114,7 +115,6 @@ const ProductModel = {
     media_url
   ) => {
     const encryptedSKU = encryptSKU(SKU);
-
     const connection = await db.getConnection(); // Start transaction
     await connection.beginTransaction();
 
@@ -126,6 +126,7 @@ const ProductModel = {
       const skuExists = existingSKUs.some((row) => row.SKU === encryptedSKU);
 
       if (skuExists) {
+        await connection.rollback();
         throw new Error("SKU already exists");
       }
 
