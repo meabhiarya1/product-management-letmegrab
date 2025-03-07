@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import styles from "./Login.module.css"; // ✅ Correct import for module CSS
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [user, setUser] = useState({
     email: "",
     password: "",
   });
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -16,21 +20,24 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/api/auth/login`,
+        `${import.meta.env.VITE_REACT_APP_BACKEND_URL}/api/auth/login`,
         user // ✅ Send user directly
       );
 
       const token = response.data.token; // ✅ Extract token
       if (token) {
         localStorage.setItem("token", token); // ✅ Store token
-        alert("Login successful!");
-        window.location.href = "/dashboard"; // ✅ Redirect
+        toast.success("Login successful");
+        navigate("/dashboard");
       } else {
-        alert("Invalid response, no token received.");
+        toast.warn("Invalid response, no token received.");
       }
     } catch (error) {
-      console.error("Login Error:", error.response?.data?.error || error.message);
-      alert(error.response?.data?.error || "Login failed");
+      console.error(
+        "Login Error:",
+        error.response?.data?.error || error.message
+      );
+      toast.error(error.response?.data?.error || "Login failed");
     }
   };
 
