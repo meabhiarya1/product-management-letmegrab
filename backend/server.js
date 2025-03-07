@@ -4,18 +4,31 @@ const bcrypt = require("bcrypt");
 const db = require("./src/config/db");
 const productRoutes = require("./src/routes/productRoutes");
 const ProductModel = require("./src/models/productModel");
+const authRoutes = require("./src/routes/authRoutes");
+const cors = require("cors");
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json()); // Parse JSON requests
+app.use(cors()); // Enable CORS
 
 // Function to create an admin user if not exists
 const createAdminUser = async () => {
   try {
     const email = "admin@gmail.com";
     const password = "123456";
+
+     // ✅ Ensure 'user' table exists before querying
+     await db.execute(`
+      CREATE TABLE IF NOT EXISTS user (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        role ENUM('admin', 'user') NOT NULL
+      )
+    `);
 
     // Check if admin already exists
     const [existingUsers] = await db.execute(
@@ -46,7 +59,7 @@ const createAdminUser = async () => {
 const initializeDatabase = async () => {
   try {
     await ProductModel.createSchemaAndTables();
-    
+
     // 🔥 Call createAdminUser after DB is initialized
     await createAdminUser();
     console.log("✅ Database initialized successfully.");
@@ -58,6 +71,7 @@ const initializeDatabase = async () => {
 
 // ✅ Define API routes
 app.use("/api", productRoutes);
+app.use("/api/auth", authRoutes);
 
 // ✅ Handle uncaught errors to prevent crashes
 process.on("unhandledRejection", (error) => {
