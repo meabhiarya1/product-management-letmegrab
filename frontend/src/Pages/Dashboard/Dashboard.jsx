@@ -1,8 +1,8 @@
-// import withAuth from "../../HOC/withAuth";
 
 const Dashboard = () => {
-  return <h1>Welcome to the Dashboard</h1>;
+  return <div>Welcome to the Dashboard</div>;
 };
 
 // export default withAuth(Dashboard);
 export default Dashboard;
+

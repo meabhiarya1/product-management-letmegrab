@@ -21,7 +21,7 @@ const Login = () => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_REACT_APP_BACKEND_URL}/api/auth/login`,
-        user // ✅ Send user directly
+        user 
       );
 
       const token = response.data.token; // ✅ Extract token
