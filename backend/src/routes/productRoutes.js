@@ -13,7 +13,7 @@ router.post("/products", productController.addProduct); //Tested
 router.put("/products/:product_id", productController.updateProduct);
 
 // ✅ Delete a Product
-router.delete("/products/:product_id", productController.deleteProduct);
+router.delete("/products/:product_id", productController.deleteProduct); //Tested
 
 // ✅ Get Category-wise Highest Price Products
 router.get("/products/category-wise-highest-price", productController.getCategoryWiseHighestPrice);
