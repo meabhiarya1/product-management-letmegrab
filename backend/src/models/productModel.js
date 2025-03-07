@@ -76,6 +76,8 @@ const ProductModel = {
       const offset = (page - 1) * limit;
       let query = `SELECT * FROM product WHERE 1=1`;
 
+      const params = [];
+
       if (filters.SKU) {
         query += ` AND SKU LIKE ${db.escape("%" + filters.SKU + "%")}`;
       }
@@ -88,19 +90,22 @@ const ProductModel = {
         query += ` AND category_id = ${db.escape(filters.category_id)}`;
       }
       if (filters.material_ids) {
-        if (Array.isArray(filters.material_ids)) {
-          query += ` AND (${filters.material_ids
+        let materialIdsArray = filters.material_ids;
+
+        // If material_ids is a string (comma-separated), split it into an array
+        if (typeof materialIdsArray === "string") {
+          materialIdsArray = materialIdsArray.split(",").map((id) => id.trim());
+        }
+
+        if (Array.isArray(materialIdsArray) && materialIdsArray.length > 0) {
+          // Generate FIND_IN_SET for each ID dynamically without ?
+          const findInSetQueries = materialIdsArray
             .map((id) => `FIND_IN_SET(${db.escape(id)}, material_ids)`)
-            .join(" OR ")})`;
-        } else {
-          query += ` AND FIND_IN_SET(${db.escape(
-            filters.material_ids
-          )}, material_ids)`;
+            .join(" OR ");
+
+          query += ` AND (${findInSetQueries})`;
         }
       }
-      // if (filters.status) {
-      //   query += ` AND status = ${db.escape(filters.status)}`;
-      // }
 
       // Directly append LIMIT and OFFSET
       const safeLimit = Number(limit) || 10;

@@ -4,7 +4,7 @@ const productController = require("../controllers/productController");
 
 
 // ✅ Get All Products with Pagination & Filters
-router.get("/products", productController.getProducts); 
+router.get("/products", productController.getProducts);  //Tested
 
 // ✅ Add a Product
 router.post("/products", productController.addProduct); //Tested

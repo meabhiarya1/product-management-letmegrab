@@ -3,14 +3,8 @@ const ProductModel = require("../models/productModel");
 // ✅ Get Products with Pagination & Filters
 exports.getProducts = async (req, res) => {
   try {
-    const {
-      page = 2,
-      limit = 4,
-      SKU,
-      product_name,
-      category_id,
-      material_ids,
-    } = req.query;
+    const { page, limit, SKU, product_name, category_id, material_ids } =
+      req.query;
 
     const filters = { SKU, product_name, category_id, material_ids };
 
