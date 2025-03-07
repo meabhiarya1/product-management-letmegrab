@@ -241,9 +241,28 @@ const ProductModel = {
 
   // ✅ Delete Product
   deleteProduct: async (product_id) => {
-    const deleteQuery = "DELETE FROM product WHERE product_id = ?";
-    await db.execute(deleteQuery, [product_id]);
-    return { message: "Product deleted successfully" };
+    const connection = await db.getConnection(); // Get a database connection
+
+    try {
+      await connection.beginTransaction(); // ✅ Start transaction
+
+      // ✅ Delete product query
+      const deleteQuery = "DELETE FROM product WHERE product_id = ?";
+      const [result] = await connection.execute(deleteQuery, [product_id]);
+
+      // ✅ Check if product existed before deleting
+      if (result.affectedRows === 0) {
+        throw new Error("Product not found");
+      }
+
+      await connection.commit(); // ✅ Commit transaction if everything is successful
+      return { message: "Product deleted successfully" };
+    } catch (error) {
+      await connection.rollback(); // ❌ Rollback transaction on error
+      throw error;
+    } finally {
+      connection.release(); // ✅ Release connection back to the pool
+    }
   },
 
   // ✅ Update Product
@@ -252,58 +271,119 @@ const ProductModel = {
     product_name,
     category_id,
     material_ids,
-    price
+    price,
+    media_url
   ) => {
-    const updateQuery = `
-      UPDATE product
-      SET product_name = ?, category_id = ?, material_ids = ?, price = ?
-      WHERE product_id = ?
-    `;
-    await db.execute(updateQuery, [
-      product_name,
-      category_id,
-      material_ids,
-      price,
-      product_id,
-    ]);
-    return { message: "Product updated successfully" };
-  },
+    const connection = await db.getConnection(); // Start transaction
+    await connection.beginTransaction();
+  
+    try {
+      // Update product details
+      const updateProductQuery = `
+        UPDATE product
+        SET product_name = ?, category_id = ?, material_ids = ?, price = ?
+        WHERE product_id = ?
+      `;
+  
+      const [productResult] = await connection.execute(updateProductQuery, [
+        product_name,
+        category_id,
+        material_ids,
+        price,
+        product_id,
+      ]);
+  
+      // ✅ Check if the update was successful
+      if (productResult.affectedRows === 0) {
+        throw new Error("Product not found or no changes made");
+      }
+  
+      // ✅ Insert or update media_url in the product_media table
+      if (media_url) {
+        const checkMediaQuery = `SELECT * FROM product_media WHERE product_id = ?`;
+        const [mediaResult] = await connection.execute(checkMediaQuery, [
+          product_id,
+        ]);
+  
+        if (mediaResult.length > 0) {
+          // ✅ Update existing media URL
+          const updateMediaQuery = `
+            UPDATE product_media
+            SET url = ?
+            WHERE product_id = ?
+          `;
+          await connection.execute(updateMediaQuery, [media_url, product_id]);
+        } else {
+          // ✅ Insert new media URL
+          const insertMediaQuery = `
+            INSERT INTO product_media (product_id, url)
+            VALUES (?, ?)
+          `;
+          await connection.execute(insertMediaQuery, [product_id, media_url]);
+        }
+      }
+  
+      await connection.commit(); // ✅ Commit transaction
+      return { message: "Product updated successfully" };
+    } catch (error) {
+      await connection.rollback(); // ❌ Rollback transaction on error
+      throw error;
+    } finally {
+      connection.release(); // ✅ Release connection back to the pool
+    }
+  },  
 
   // ✅ Get Statistics (Category-wise Highest Price)
   getCategoryWiseHighestPrice: async () => {
-    const query = `
-      SELECT c.category_name, MAX(p.price) AS highest_price
-      FROM product p
-      JOIN category c ON p.category_id = c.category_id
-      GROUP BY c.category_name
-    `;
-    const [result] = await db.execute(query);
-    return result;
+    try {
+      const query = `
+        SELECT c.category_name, MAX(p.price) AS highest_price
+        FROM product p
+        JOIN category c ON p.category_id = c.category_id
+        GROUP BY c.category_name
+      `;
+
+      const [result] = await db.execute(query);
+      return result;
+    } catch (error) {
+      throw error; // Handle errors properly
+    }
   },
 
   // ✅ Get Product Count by Price Range
   getPriceRangeProductCount: async () => {
-    const query = `
-      SELECT 
-        SUM(CASE WHEN price BETWEEN 0 AND 500 THEN 1 ELSE 0 END) AS '0-500',
-        SUM(CASE WHEN price BETWEEN 501 AND 1000 THEN 1 ELSE 0 END) AS '501-1000',
-        SUM(CASE WHEN price > 1000 THEN 1 ELSE 0 END) AS '1000+'
-      FROM product;
-    `;
-    const [result] = await db.execute(query);
-    return result[0]; // Return single row
+    try {
+      const query = `
+        SELECT 
+          SUM(CASE WHEN price BETWEEN 0 AND 500 THEN 1 ELSE 0 END) AS '0-500',
+          SUM(CASE WHEN price BETWEEN 501 AND 1000 THEN 1 ELSE 0 END) AS '501-1000',
+          SUM(CASE WHEN price > 1000 THEN 1 ELSE 0 END) AS '1000+'
+        FROM product;
+      `;
+
+      const [result] = await db.execute(query);
+      return result[0]; // ✅ Return single row (since it's an aggregated result)
+    } catch (error) {
+      throw error; // Handle error properly
+    }
   },
 
   // ✅ Get Products Without Media
   getProductsWithoutMedia: async () => {
-    const query = `
-      SELECT p.*
-      FROM product p
-      LEFT JOIN product_media pm ON p.product_id = pm.product_id
-      WHERE pm.product_id IS NULL
-    `;
-    const [products] = await db.execute(query);
-    return products;
+    try {
+      const query = `
+        SELECT p.*
+        FROM product p
+        LEFT JOIN product_media pm ON p.product_id = pm.product_id
+        WHERE pm.product_id IS NULL OR pm.url IS NULL
+      `;
+      const [products] = await db.execute(query);
+      console.log("Products without media:", products);
+      return products;
+    } catch (error) {
+      console.error("🚨 Database Query Error:", error);
+      throw new Error("Failed to fetch products without media");
+    }
   },
 };
 

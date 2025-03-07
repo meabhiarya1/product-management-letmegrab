@@ -68,7 +68,8 @@ exports.addProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     const { product_id } = req.params;
-    const { product_name, category_id, material_ids, price } = req.body;
+    const { product_name, category_id, material_ids, price, media_url } =
+      req.body;
 
     if (
       !product_id ||
@@ -77,7 +78,9 @@ exports.updateProduct = async (req, res) => {
       !material_ids ||
       !price
     ) {
-      return res.status(400).json({ error: "All fields are required" });
+      return res
+        .status(400)
+        .json({ error: "All fields are required except media_url" });
     }
 
     const result = await ProductModel.updateProduct(
@@ -85,8 +88,10 @@ exports.updateProduct = async (req, res) => {
       product_name,
       category_id,
       material_ids,
-      price
+      price,
+      media_url // ✅ Pass media_url to model
     );
+
     res.status(200).json(result);
   } catch (error) {
     res
