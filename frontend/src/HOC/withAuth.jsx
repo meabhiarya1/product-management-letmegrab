@@ -1,14 +1,20 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const withAuth = (Component) => (props) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    if (!localStorage.getItem("token")) navigate("/");
-  }, [navigate]);
+    if (!token) {
+      navigate("/", { replace: true });
+    } else if (token && location.pathname === "/") {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [token, navigate, location.pathname]);
 
-  return localStorage.getItem("token") ? <Component {...props} /> : null;
+  return token ? <Component {...props} /> : null;
 };
 
 export default withAuth;

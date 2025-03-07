@@ -54,7 +54,7 @@ body, html {
     font-size: 16px;
     border-radius: 8px;
     color: #979797;
-    width: 90%;
+    width: 100%;
     box-shadow: rgb(136 136 136 / 17%) 0px -23px 25px 0px inset,
       rgb(81 81 81 / 23%) 0px -36px 30px 0px inset,
       rgba(0, 0, 0, 0.1) 0px -79px 40px 0px inset, rgba(0, 0, 0, 0.06) 0px 2px 1px,
@@ -118,7 +118,7 @@ body, html {
     .login-container {
       padding: 30px;
       max-width: 90%;
-      width: 300px;
+      width: 500px;
     }
     
     .heading {
@@ -144,6 +144,7 @@ body, html {
     .login-container {
       padding: 20px;
       max-width: 95%;
+      width: 400px;
     }
     
     .heading {

@@ -1,8 +1,7 @@
-
 const Dashboard = () => {
-  return <div>Welcome to the Dashboard</div>;
+  return (
+    <div className="text-3xl font-bold underline">Welcome to the Dashboard</div>
+  );
 };
 
-// export default withAuth(Dashboard);
 export default Dashboard;
-
