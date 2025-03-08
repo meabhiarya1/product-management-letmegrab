@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Navbar from "../../Comp/Navbar/Navbar";
-import SubNavbar from "../../Comp/SubNavbar/SubNavbar";
 import Dropdown from "../../Comp/Dropdown/Dropdown";
 import FilterDropDown from "../../Comp/Dropdown/FilterDropDown";
+import Modal from "../../Comp/Modal/Modal";
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
@@ -14,6 +14,7 @@ const Dashboard = () => {
   const [limit, setLimit] = useState(5);
   const [dropDown, setDropDown] = useState(false);
   const [filterDropDown, setFilterDropDown] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
   const headers = [
     "Product ID",
     "Product Name",
@@ -76,16 +77,31 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-end p-6 bg-gray-100">
+    <div className="min-h-screen flex flex-col items-end p-6 bg-gray-100 ">
       {/* Navbar */}
       <Navbar handleLogout={handleLogout} />
-
-      <Dropdown
-        setDropDown={setDropDown}
-        dropDown={dropDown}
-        setLimit={setLimit}
-        limit={limit}
-      />
+      <div className="w-[300px] flex justify-between items-end mt-3">
+        <div class="flex justify-center items-center gap-12 h-full">
+          <div class="bg-gradient-to-b from-gray-600 to-gray-700 rounded-[8px] px-3 py-2 cursor-pointer">
+            <div class="flex gap-2 items-center">
+              <span
+                class="font-semibold text-white"
+                onClick={() => setOpenModal(!openModal)}
+              >
+                Add Product
+              </span>
+            </div>
+          </div>
+        </div>
+        <Dropdown
+          setDropDown={setDropDown}
+          dropDown={dropDown}
+          setLimit={setLimit}
+          limit={limit}
+        />
+      </div>
+      {/* Modal */}
+      {openModal && <Modal setOpenModal={setOpenModal} />}
       {/* Table */}
       <div className="w-full mt-2 overflow-x-auto bg-white shadow-md rounded-lg max-h-[580px] min-h-[200px]">
         <table className="w-full bg-white shadow-md rounded-lg overflow-y-auto">
