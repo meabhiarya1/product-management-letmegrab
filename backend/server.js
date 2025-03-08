@@ -59,7 +59,6 @@ const createAdminUser = async () => {
 const initializeDatabase = async () => {
   try {
     await ProductModel.createSchemaAndTables();
-
     // 🔥 Call createAdminUser after DB is initialized
     await createAdminUser();
     console.log("✅ Database initialized successfully.");

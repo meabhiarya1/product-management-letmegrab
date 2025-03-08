@@ -35,6 +35,10 @@ const Modal = ({
               placeholder="Enter SKU"
               type="text"
               value={selectedProduct?.SKU_VALUE}
+              required
+              onChange={(e) => {
+                setCreatedProduct({ ...createdProduct, SKU: e.target.value });
+              }}
             />
           </div>
 
@@ -46,6 +50,13 @@ const Modal = ({
               placeholder="Enter Product Name"
               type="text"
               value={selectedProduct?.product_name}
+              required
+              onChange={(e) => {
+                setCreatedProduct({
+                  ...createdProduct,
+                  product_name: e.target.value,
+                });
+              }}
             />
           </div>
 
@@ -57,6 +68,13 @@ const Modal = ({
               placeholder="Enter Category Name"
               type="text"
               value={selectedProduct?.category_name}
+              required
+              onChange={(e) => {
+                setCreatedProduct({
+                  ...createdProduct,
+                  category_name: e.target.value,
+                });
+              }}
             />
           </div>
 
@@ -67,7 +85,14 @@ const Modal = ({
               className="bg-[#222630] px-4 py-3 outline-none w-full text-white rounded-lg border-2 transition-colors duration-100 border-solid focus:border-[#596A95] border-[#2B3040]"
               placeholder="Enter Material Names"
               type="text"
-              value={selectedProduct?.material_names}
+              value={selectedProduct?.material_names.join(", ")}
+              required
+              onChange={(e) => {
+                setCreatedProduct({
+                  ...createdProduct,
+                  material_names: [...createdProduct.material_names, e.target.value],
+                });
+              }}
             />
           </div>
 
@@ -79,6 +104,10 @@ const Modal = ({
               placeholder="Enter Price"
               type="text"
               value={selectedProduct?.price}
+              required
+              onChange={(e) => {
+                setCreatedProduct({ ...createdProduct, price: e.target.value });
+              }}
             />
           </div>
 
@@ -90,6 +119,13 @@ const Modal = ({
               placeholder="Enter Media URL"
               type="text"
               value={selectedProduct?.media_url}
+              required
+              onChange={(e) => {
+                setCreatedProduct({
+                  ...createdProduct,
+                  media_url: e.target.value,
+                });
+              }}
             />
           </div>
         </div>
@@ -109,7 +145,7 @@ const Modal = ({
             }
             className="inline-block w-full sm:w-auto py-3 px-5 mb-2 text-center font-semibold leading-6 text-blue-50 bg-green-500 hover:bg-green-600 rounded-lg transition duration-200"
           >
-            {loader ? <Loader /> : operation}
+            {loader ? <Loader className="animate-spin size-5" /> : operation}
           </button>
         </div>
       </div>

@@ -31,7 +31,8 @@ const Dashboard = () => {
     "Operations",
   ];
   const navigate = useNavigate();
-
+  // Retrieve token from localStorage
+  const token = localStorage.getItem("token");
   // Fetch products from API
   useEffect(() => {
     fetchProducts(currentPage);
@@ -46,8 +47,6 @@ const Dashboard = () => {
 
   const fetchProducts = async (page) => {
     try {
-      const token = localStorage.getItem("token"); // Retrieve token from localStorage
-
       const response = await axios.get(
         `${
           import.meta.env.VITE_REACT_APP_BACKEND_URL
@@ -75,16 +74,33 @@ const Dashboard = () => {
   };
 
   // Handle Add/Update
-  const handleSaveProduct = (createdProduct) => {
-
+  const handleSaveProduct = async (createdProduct) => {
+    setLoader(true);
     if (selectedProduct && operation === "Update") {
       // Update existing product in the list
       setProducts(
         products.map((p) => (p.id === createdProduct.id ? createdProduct : p))
       );
-    } else {
-      // Add new product to the list
-      setProducts([...products, createdProduct]);
+    } else if (createdProduct && operation === "Add") {
+      try {
+        const response = await axios.post(
+          `${import.meta.env.VITE_REACT_APP_BACKEND_URL}/api/products`,
+          createdProduct,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Attach token in Authorization header
+            },
+          }
+        );
+        console.log(response);
+        setProducts([...products, createdProduct]);
+        toast.success("Product saved successfully");
+      } catch (error) {
+        console.error("Error saving product:", error);
+        toast.error(error.response.data.error || "Failed to save product");
+      } finally {
+        setLoader(false);
+      }
     }
     setIsModalOpen(false); // Close modal
     setSelectedProduct(null); // Reset selected product
