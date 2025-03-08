@@ -10,6 +10,24 @@ const schemaName = process.env.DB_NAME;
 const encryptSKU = (sku) =>
   crypto.createHash("sha256").update(sku).digest("hex");
 
+// Secret key (store securely, e.g., in .env)
+const algorithm = "aes-256-cbc";
+const secretKey = crypto.createHash("sha256").update("mySecretKey").digest(); // 32-byte key
+const iv = crypto.randomBytes(16); // 16-byte IV
+
+// Encrypt function
+const encrypt = (text) => {
+  try {
+    const cipher = crypto.createCipheriv(algorithm, secretKey, iv);
+    let encrypted = cipher.update(text, "utf8", "hex");
+    encrypted += cipher.final("hex");
+    return iv.toString("hex") + ":" + encrypted; // Store IV + Encrypted data
+  } catch (error) {
+    console.error("Encryption error:", error.message);
+    return null;
+  }
+};
+
 // ✅ Product Model
 const ProductModel = {
   // ✅ Create Database & Tables
@@ -182,7 +200,8 @@ const ProductModel = {
     price,
     media_url
   ) => {
-    const encryptedSKU = encryptSKU(SKU);
+    // const encryptedSKU = encryptSKU(SKU);
+    const encryptedSKU = encrypt(SKU); // Encrypt SKU
     const connection = await db.getConnection(); // Start transaction
     await connection.beginTransaction();
 

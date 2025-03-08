@@ -18,7 +18,7 @@ const Dashboard = () => {
   useEffect(() => {
     fetchProducts(currentPage);
   }, [currentPage, limit, totalPages]);
-
+  
   // Reset current page to 1 when dropdown is closed
   useEffect(() => {
     if (!dropDown) {
