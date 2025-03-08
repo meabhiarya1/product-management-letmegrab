@@ -10,24 +10,6 @@ const schemaName = process.env.DB_NAME;
 const encryptSKU = (sku) =>
   crypto.createHash("sha256").update(sku).digest("hex");
 
-// Secret key (store securely, e.g., in .env)
-const algorithm = "aes-256-cbc";
-const secretKey = crypto.createHash("sha256").update("mySecretKey").digest(); // 32-byte key
-const iv = crypto.randomBytes(16); // 16-byte IV
-
-// Encrypt function
-const encrypt = (text) => {
-  try {
-    const cipher = crypto.createCipheriv(algorithm, secretKey, iv);
-    let encrypted = cipher.update(text, "utf8", "hex");
-    encrypted += cipher.final("hex");
-    return iv.toString("hex") + ":" + encrypted; // Store IV + Encrypted data
-  } catch (error) {
-    console.error("Encryption error:", error.message);
-    return null;
-  }
-};
-
 // ✅ Product Model
 const ProductModel = {
   // ✅ Create Database & Tables
@@ -64,6 +46,7 @@ const ProductModel = {
         CREATE TABLE IF NOT EXISTS product (
           product_id INT AUTO_INCREMENT PRIMARY KEY,
           SKU VARCHAR(255) NOT NULL UNIQUE,
+          SKU_VALUE VARCHAR(255) NOT NULL UNIQUE,
           product_name VARCHAR(255) NOT NULL,
           category_id INT NOT NULL,
           material_ids VARCHAR(255) NOT NULL,
@@ -174,7 +157,7 @@ const ProductModel = {
       // ✅ Execute both queries
       const [products] = await db.query(productQuery);
       const [[{ total_count }]] = await db.query(countQuery); // Fetch total count
-
+      // console.log(products);
       // Format material_names as an array
       const formattedProducts = products.map((product) => ({
         ...product,
@@ -182,6 +165,7 @@ const ProductModel = {
           ? product.material_names.split(",")
           : [],
         media_url: product.media_url || null,
+        SKU: decrypt(product.SKU), // Decrypt SKU
       }));
 
       return { products: formattedProducts, total_count };
@@ -198,26 +182,24 @@ const ProductModel = {
     category_name,
     materials,
     price,
-    media_url
+    media_url,
+    SKU_VALUE
   ) => {
-    // const encryptedSKU = encryptSKU(SKU);
-    const encryptedSKU = encrypt(SKU); // Encrypt SKU
+    const encryptedSKU = encryptSKU(SKU);
     const connection = await db.getConnection(); // Start transaction
     await connection.beginTransaction();
 
     try {
       // ✅ Fetch all SKUs from the database
-      const [existingSKUs] = await db.execute("SELECT SKU FROM product");
-
-      // ✅ Check if the encrypted SKU exists in the database
-      const skuExists = existingSKUs.some((row) => row.SKU === encryptedSKU);
-
-      if (skuExists) {
+      const [existingSKUs] = await db.execute(
+        "SELECT * FROM product WHERE SKU = ?",
+        [encryptedSKU]
+      );
+      if (existingSKUs.length > 0) {
         await connection.rollback();
         throw new Error("SKU already exists");
       }
 
-      // 🔹 Step 1: Insert Category (if not exists)
       let [categoryResult] = await connection.execute(
         "SELECT category_id FROM category WHERE category_name = ?",
         [category_name]
@@ -234,7 +216,6 @@ const ProductModel = {
         category_id = insertCategory.insertId;
       }
 
-      // 🔹 Step 2: Insert Materials (if not exist) and collect their IDs
       const materialIds = [];
       for (let material_name of materials) {
         let [materialResult] = await connection.execute(
@@ -255,23 +236,13 @@ const ProductModel = {
         materialIds.push(material_id);
       }
 
-      // 🔹 Step 3: Check if SKU already exists
-      const [existing] = await connection.execute(
-        "SELECT * FROM product WHERE SKU = ?",
-        [encryptedSKU]
-      );
-      if (existing.length > 0) {
-        await connection.rollback();
-        throw new Error("SKU already exists");
-      }
-
-      // 🔹 Step 4: Insert Product
       const insertProductQuery = `
-        INSERT INTO product (SKU, product_name, category_id, material_ids, price)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO product (SKU, SKU_VALUE, product_name, category_id, material_ids, price)
+        VALUES (?, ?, ?, ?, ?, ?)
       `;
       const [productResult] = await connection.execute(insertProductQuery, [
         encryptedSKU,
+        SKU_VALUE,
         product_name,
         category_id,
         materialIds.join(","), // Convert array to comma-separated string

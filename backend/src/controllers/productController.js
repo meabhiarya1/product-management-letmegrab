@@ -62,7 +62,8 @@ exports.addProduct = async (req, res) => {
       category_name,
       material_names,
       price,
-      media_url
+      media_url,
+      SKU_VALUE=SKU
     );
 
     res.status(201).json(result);
