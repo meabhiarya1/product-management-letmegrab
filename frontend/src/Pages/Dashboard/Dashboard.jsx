@@ -16,14 +16,33 @@ const Dashboard = () => {
 
   const fetchProducts = async (page) => {
     try {
-      const response = await fetch(`https://yourapi.com/products?page=${page}`);
-      const data = await response.json();
-      setProducts(data.products);
-      setTotalPages(data.totalPages);
+      const token = localStorage.getItem("token"); // Retrieve token from localStorage
+
+      const response = await axios.get(
+        `${
+          import.meta.env.VITE_REACT_APP_BACKEND_URL
+        }/api/products?page=${page}&limit=5`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach token in Authorization header
+          },
+        }
+      );
+      setProducts(response?.data);
+      // setTotalPages(response?.data);
     } catch (error) {
       console.error("Error fetching products:", error);
+      console.log(error?.response?.status)
+      if (error?.response?.status === 403) {
+        // Unauthorized
+        toast.error("Token Expired. Please login again");
+        navigate("/"); // Redirect to login page
+      }
+      toast.error("Failed to fetch products");
     }
   };
+
+  console.log(products);
 
   // Logout Functionality
   const handleLogout = () => {
@@ -52,20 +71,24 @@ const Dashboard = () => {
         <table className="w-full bg-white shadow-md rounded-lg">
           <thead className="bg-blue-500 text-white">
             <tr>
-              <th className="p-3">ID</th>
-              <th className="p-3">Name</th>
+              <th className="p-3">Product ID</th>
+              <th className="p-3">Product Name</th>
               <th className="p-3">Price</th>
               <th className="p-3">Category</th>
+              <th className="p-3">Materials</th>
+              <th className="p-3">Media_URL</th>
             </tr>
           </thead>
           <tbody>
-            {products.length > 0 ? (
-              products.map((product) => (
+            {products?.length > 0 ? (
+              products?.map((product) => (
                 <tr key={product.id} className="border-b">
-                  <td className="p-3 text-center">{product.id}</td>
-                  <td className="p-3">{product.name}</td>
+                  <td className="p-3 text-center">{product.product_id}</td>
+                  <td className="p-3 text-center">{product.product_name}</td>
                   <td className="p-3 text-center">${product.price}</td>
-                  <td className="p-3 text-center">{product.category}</td>
+                  <td className="p-3 text-center">{product.category_name}</td>
+                  <td className="p-3 text-center">{product.material_names}</td>
+                  <td className="p-3 text-center">{product.media_url}</td>
                 </tr>
               ))
             ) : (

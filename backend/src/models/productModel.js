@@ -83,40 +83,53 @@ const ProductModel = {
   getProducts: async (page, limit, filters) => {
     try {
       const offset = (page - 1) * limit;
-      let query = `SELECT * FROM product WHERE 1=1`;
 
-      const params = [];
+      // Start query with joins
+      let query = `
+        SELECT 
+          p.*, 
+          c.category_name, 
+          GROUP_CONCAT(DISTINCT m.material_name) AS material_names,
+          MIN(pm.url) AS media_url  -- Fetch only one media URL per product
+        FROM product p
+        LEFT JOIN category c ON p.category_id = c.category_id
+        LEFT JOIN material m ON FIND_IN_SET(m.material_id, p.material_ids)
+        LEFT JOIN product_media pm ON p.product_id = pm.product_id
+        WHERE 1=1
+      `;
 
+      // Apply filters
       if (filters.SKU) {
-        query += ` AND SKU LIKE ${db.escape("%" + filters.SKU + "%")}`;
+        query += ` AND p.SKU LIKE ${db.escape("%" + filters.SKU + "%")}`;
       }
       if (filters.product_name) {
-        query += ` AND product_name LIKE ${db.escape(
+        query += ` AND p.product_name LIKE ${db.escape(
           "%" + filters.product_name + "%"
         )}`;
       }
       if (filters.category_id) {
-        query += ` AND category_id = ${db.escape(filters.category_id)}`;
+        query += ` AND p.category_id = ${db.escape(filters.category_id)}`;
       }
       if (filters.material_ids) {
         let materialIdsArray = filters.material_ids;
 
-        // If material_ids is a string (comma-separated), split it into an array
         if (typeof materialIdsArray === "string") {
           materialIdsArray = materialIdsArray.split(",").map((id) => id.trim());
         }
 
         if (Array.isArray(materialIdsArray) && materialIdsArray.length > 0) {
-          // Generate FIND_IN_SET for each ID dynamically without ?
           const findInSetQueries = materialIdsArray
-            .map((id) => `FIND_IN_SET(${db.escape(id)}, material_ids)`)
+            .map((id) => `FIND_IN_SET(${db.escape(id)}, p.material_ids)`)
             .join(" OR ");
 
           query += ` AND (${findInSetQueries})`;
         }
       }
 
-      // Directly append LIMIT and OFFSET
+      // Group by product_id to aggregate materials but keep only one media URL
+      query += ` GROUP BY p.product_id`;
+
+      // Apply pagination
       const safeLimit = Number(limit) || 10;
       const safeOffset = Number(offset) || 0;
       query += ` LIMIT ${safeLimit} OFFSET ${safeOffset}`;
@@ -124,11 +137,22 @@ const ProductModel = {
       console.log("Executing Query:", query);
 
       const [products] = await db.query(query);
+
+      // Format material_names as an array, but media_url remains a string
+      const formattedProducts = products.map((product) => ({
+        ...product,
+        material_names: product.material_names
+          ? product.material_names.split(",")
+          : [],
+        media_url: product.media_url || null, // Keep media_url as a single value
+      }));
+
       console.log(
         "Products Retrieved:",
-        products.length ? products : "No products found"
+        formattedProducts.length ? formattedProducts : "No products found"
       );
-      return products;
+
+      return formattedProducts;
     } catch (error) {
       console.error("🚨 Database Query Error:", error);
       throw new Error("Database query failed");
