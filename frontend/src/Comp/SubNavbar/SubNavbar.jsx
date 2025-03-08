@@ -2,9 +2,9 @@ import React from "react";
 
 const SubNavbar = () => {
   return (
-    <div class="card w-full bg-white p-5 shadow-md shadow-purple-200/50 rounded-md mt-2">
-      <ul class="w-full flex   gap-2">
-        <li class="flex-center cursor-pointer p-16-semibold w-full whitespace-nowrap">
+    <div class="card max-w-1/3 bg-white p-5 shadow-md shadow-purple-200/50 rounded-md mt-2 ">
+      <ul class="w-full flex gap-2">
+        <li class="flex-center cursor-pointer p-16-semibold max-w-1/3 whitespace-nowrap">
           <button class="p-16-semibold flex size-full gap-4 p-4 group font-semibold rounded-full bg-cover hover:bg-purple-100 hover:shadow-inner focus:bg-gradient-to-r from-purple-400 to-purple-600 focus:text-white text-gray-700 transition-all ease-linear">
             <svg
               stroke="#000000"
@@ -29,7 +29,7 @@ const SubNavbar = () => {
             Dashboard
           </button>
         </li>
-        <li class="flex-center cursor-pointer p-16-semibold w-full whitespace-nowrap">
+        <li class="flex-center cursor-pointer p-16-semibold max-w-1/3 whitespace-nowrap">
           <button class="p-16-semibold flex size-full gap-4 p-4 group font-semibold rounded-full bg-cover hover:bg-purple-100 hover:shadow-inner focus:bg-gradient-to-r from-purple-400 to-purple-600 focus:text-white text-gray-700 transition-all ease-linear">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -56,7 +56,7 @@ const SubNavbar = () => {
             Settings
           </button>
         </li>
-        <li class="flex-center cursor-pointer p-16-semibold w-full whitespace-nowrap">
+        <li class="flex-center cursor-pointer p-16-semibold max-w-1/3 whitespace-nowrap">
           <button class="p-16-semibold flex size-full gap-4 p-4 group font-semibold rounded-full bg-cover hover:bg-purple-100 hover:shadow-inner focus:bg-gradient-to-r from-purple-400 to-purple-600 focus:text-white text-gray-700 transition-all ease-linear">
             <svg
               xmlns="http://www.w3.org/2000/svg"

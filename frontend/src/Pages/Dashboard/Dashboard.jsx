@@ -4,18 +4,27 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import Navbar from "../../Comp/Navbar/Navbar";
 import SubNavbar from "../../Comp/SubNavbar/SubNavbar";
+import Dropdown from "../../Comp/Dropdown/Dropdown";
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [limit, setLimit] = useState(5);
+  const [dropDown, setDropDown] = useState(false);
   const navigate = useNavigate();
 
   // Fetch products from API
   useEffect(() => {
     fetchProducts(currentPage);
-  }, [currentPage]);
+  }, [currentPage, limit, totalPages]);
+
+  // Reset current page to 1 when dropdown is closed
+  useEffect(() => {
+    if (!dropDown) {
+      setCurrentPage(1);
+    }
+  }, [dropDown]);
 
   const fetchProducts = async (page) => {
     try {
@@ -61,8 +70,14 @@ const Dashboard = () => {
       <Navbar handleLogout={handleLogout} />
 
       {/* Table */}
-      <SubNavbar className="mt-4" />
-      <div className="w-full mt-6 overflow-x-auto bg-white shadow-md rounded-lg max-h-[580px]">
+      {/* <SubNavbar   /> */}
+      <Dropdown
+        setDropDown={setDropDown}
+        dropDown={dropDown}
+        setLimit={setLimit}
+        limit={limit}
+      />
+      <div className="w-full mt-2 overflow-x-auto bg-white shadow-md rounded-lg max-h-[580px]">
         <table className="w-full bg-white shadow-md rounded-lg overflow-y-auto">
           <thead className="bg-blue-500 text-white ">
             <tr className="">
@@ -82,7 +97,9 @@ const Dashboard = () => {
                   <td className="p-3 text-center">{product.product_name}</td>
                   <td className="p-3 text-center">${product.price}</td>
                   <td className="p-3 text-center">{product.category_name}</td>
-                  <td className="p-3 text-center">{product.material_names}</td>
+                  <td className="p-3 text-center">
+                    {product.material_names.join(" ")}
+                  </td>
                   <td className="p-3 text-center">{product.media_url}</td>
                 </tr>
               ))
