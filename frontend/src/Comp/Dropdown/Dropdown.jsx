@@ -4,10 +4,10 @@ const Dropdown = ({ setDropDown, dropDown, setLimit, limit }) => {
   return (
     <div className="relative mt-2">
       <div
-        className="inline-flex items-center overflow-hidden rounded-md border bg-white"
+        className="inline-flex items-center overflow-hidden rounded-md  bg-white shadow-sm cursor-pointer justify-end" 
         onClick={() => setDropDown(!dropDown)}
       >
-        <div className="border-e px-4 py-2 text-sm/none text-gray-600 hover:bg-gray-50 hover:text-gray-700">
+        <div className="px-4 py-2 text-sm/none text-gray-600 hover:bg-gray-50 hover:text-gray-700">
           {limit}
         </div>
 
