@@ -6,6 +6,8 @@ import Navbar from "../../Comp/Navbar/Navbar";
 import Dropdown from "../../Comp/Dropdown/Dropdown";
 import FilterDropDown from "../../Comp/Dropdown/FilterDropDown";
 import Modal from "../../Comp/Modal/Modal";
+import { FaEdit } from "react-icons/fa";
+import { MdAutoDelete } from "react-icons/md";
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
@@ -15,6 +17,9 @@ const Dashboard = () => {
   const [dropDown, setDropDown] = useState(false);
   const [filterDropDown, setFilterDropDown] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [operation, setOperation] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [loader, setLoader] = useState(false);
   const headers = [
     "Product ID",
     "Product Name",
@@ -23,6 +28,7 @@ const Dashboard = () => {
     "Materials",
     "Media_URL",
     "SKU_ID",
+    "Operations",
   ];
   const navigate = useNavigate();
 
@@ -60,11 +66,28 @@ const Dashboard = () => {
       console.log(error?.response?.status);
       if (error?.response?.status === 403) {
         // Unauthorized
+        localStorage.removeItem("token");
         toast.error("Token Expired. Please login again");
         navigate("/"); // Redirect to login page
       }
       toast.error("Failed to fetch products");
     }
+  };
+
+  // Handle Add/Update
+  const handleSaveProduct = (createdProduct) => {
+
+    if (selectedProduct && operation === "Update") {
+      // Update existing product in the list
+      setProducts(
+        products.map((p) => (p.id === createdProduct.id ? createdProduct : p))
+      );
+    } else {
+      // Add new product to the list
+      setProducts([...products, createdProduct]);
+    }
+    setIsModalOpen(false); // Close modal
+    setSelectedProduct(null); // Reset selected product
   };
 
   // Logout Functionality
@@ -86,7 +109,10 @@ const Dashboard = () => {
             <div class="flex gap-2 items-center">
               <span
                 class="font-semibold text-white"
-                onClick={() => setOpenModal(!openModal)}
+                onClick={() => {
+                  setOperation("Add");
+                  setOpenModal(!openModal);
+                }}
               >
                 Add Product
               </span>
@@ -101,7 +127,15 @@ const Dashboard = () => {
         />
       </div>
       {/* Modal */}
-      {openModal && <Modal setOpenModal={setOpenModal} />}
+      {openModal && (
+        <Modal
+          setOpenModal={setOpenModal}
+          operation={operation}
+          selectedProduct={selectedProduct}
+          handleSaveProduct={handleSaveProduct}
+          loader={loader}
+        />
+      )}
       {/* Table */}
       <div className="w-full mt-2 overflow-x-auto bg-white shadow-md rounded-lg max-h-[580px] min-h-[200px]">
         <table className="w-full bg-white shadow-md rounded-lg overflow-y-auto">
@@ -125,6 +159,26 @@ const Dashboard = () => {
                   </td>
                   <td className="p-3 text-center">{product.media_url}</td>
                   <td className="p-3 text-center">{product.SKU_VALUE}</td>
+
+                  <td className="p-3 text-center flex ">
+                    <FaEdit
+                      className="cursor-pointer mx-auto"
+                      size={23}
+                      onClick={() => {
+                        setOperation("Update");
+                        setSelectedProduct(product);
+                        setOpenModal(!openModal);
+                      }}
+                    />
+                    <MdAutoDelete
+                      className="cursor-pointer mx-auto"
+                      size={23}
+                      onClick={() => {
+                        setSelectedProduct(product);
+                        setOpenModal(!openModal);
+                      }}
+                    />
+                  </td>
                 </tr>
               ))
             ) : (

@@ -13,26 +13,32 @@ const FilterDropDown = ({
           <th
             key={header}
             className="p-3 relative cursor-pointer"
-            onClick={() =>
-              setFilterDropDown(filterDropDown === header ? null : header)
+            onClick={
+              header !== "Operations"
+                ? () => setFilterDropDown(header)
+                : undefined
             }
           >
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-center">
               <span>{header}</span>
-              <div className="relative cursor-pointer">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="size-4 ml-2"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
+              {header != "Operations" ? (
+                <div className="relative cursor-pointer">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="size-4 ml-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              ) : (
+                ""
+              )}
             </div>
 
             {filterDropDown === header && (
