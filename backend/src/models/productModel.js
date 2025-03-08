@@ -165,7 +165,7 @@ const ProductModel = {
           ? product.material_names.split(",")
           : [],
         media_url: product.media_url || null,
-        SKU: decrypt(product.SKU), // Decrypt SKU
+        SKU_VALUE: product.SKU_VALUE, // Decrypt SKU
       }));
 
       return { products: formattedProducts, total_count };
