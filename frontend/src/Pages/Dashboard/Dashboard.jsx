@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import Navbar from "../../Comp/Navbar/Navbar";
 import SubNavbar from "../../Comp/SubNavbar/SubNavbar";
 import Dropdown from "../../Comp/Dropdown/Dropdown";
+import FilterDropDown from "../../Comp/Dropdown/FilterDropDown";
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
@@ -12,13 +13,23 @@ const Dashboard = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [limit, setLimit] = useState(5);
   const [dropDown, setDropDown] = useState(false);
+  const [filterDropDown, setFilterDropDown] = useState(false);
+  const headers = [
+    "Product ID",
+    "Product Name",
+    "Price",
+    "Category",
+    "Materials",
+    "Media_URL",
+    "SKU_ID",
+  ];
   const navigate = useNavigate();
 
   // Fetch products from API
   useEffect(() => {
     fetchProducts(currentPage);
   }, [currentPage, limit, totalPages]);
-  
+
   // Reset current page to 1 when dropdown is closed
   useEffect(() => {
     if (!dropDown) {
@@ -69,26 +80,22 @@ const Dashboard = () => {
       {/* Navbar */}
       <Navbar handleLogout={handleLogout} />
 
-      {/* Table */}
-      {/* <SubNavbar   /> */}
       <Dropdown
         setDropDown={setDropDown}
         dropDown={dropDown}
         setLimit={setLimit}
         limit={limit}
       />
-      <div className="w-full mt-2 overflow-x-auto bg-white shadow-md rounded-lg max-h-[580px]">
+      {/* Table */}
+      <div className="w-full mt-2 overflow-x-auto bg-white shadow-md rounded-lg max-h-[580px] min-h-[200px]">
         <table className="w-full bg-white shadow-md rounded-lg overflow-y-auto">
-          <thead className="bg-blue-500 text-white ">
-            <tr className="">
-              <th className="p-3">Product ID</th>
-              <th className="p-3">Product Name</th>
-              <th className="p-3">Price</th>
-              <th className="p-3">Category</th>
-              <th className="p-3">Materials</th>
-              <th className="p-3">Media_URL</th>
-            </tr>
-          </thead>
+          <FilterDropDown
+            headers={headers}
+            filterDropDown={filterDropDown}
+            setFilterDropDown={setFilterDropDown}
+            products={products}
+          />
+
           <tbody className="text-gray-700">
             {products?.length > 0 ? (
               products?.map((product) => (
@@ -101,11 +108,12 @@ const Dashboard = () => {
                     {product.material_names.join(" ")}
                   </td>
                   <td className="p-3 text-center">{product.media_url}</td>
+                  <td className="p-3 text-center">{product.SKU_VALUE}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="p-3 text-center text-gray-500">
+                <td colSpan="8" className="p-3 text-center text-gray-500">
                   No products found.
                 </td>
               </tr>
