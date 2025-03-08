@@ -8,9 +8,16 @@ exports.getProducts = async (req, res) => {
 
     const filters = { SKU, product_name, category_id, material_ids };
 
-    const products = await ProductModel.getProducts(page, limit, filters);
+    const { products, total_count } = await ProductModel.getProducts(
+      page,
+      limit,
+      filters
+    );
 
-    res.status(200).json(products);
+    res.status(200).json({
+      products,
+      total_count,
+    });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch products" });
   }

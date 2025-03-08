@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Navbar from "../../Comp/Navbar/Navbar";
+import SubNavbar from "../../Comp/SubNavbar/SubNavbar";
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [limit, setLimit] = useState(5);
   const navigate = useNavigate();
 
   // Fetch products from API
@@ -21,18 +24,19 @@ const Dashboard = () => {
       const response = await axios.get(
         `${
           import.meta.env.VITE_REACT_APP_BACKEND_URL
-        }/api/products?page=${page}&limit=5`,
+        }/api/products?page=${page}&limit=${limit}`,
         {
           headers: {
             Authorization: `Bearer ${token}`, // Attach token in Authorization header
           },
         }
       );
-      setProducts(response?.data);
-      // setTotalPages(response?.data);
+      console.log(response.data);
+      setProducts(response?.data?.products);
+      setTotalPages(Math.ceil(response?.data?.total_count / limit));
     } catch (error) {
       console.error("Error fetching products:", error);
-      console.log(error?.response?.status)
+      console.log(error?.response?.status);
       if (error?.response?.status === 403) {
         // Unauthorized
         toast.error("Token Expired. Please login again");
@@ -41,8 +45,6 @@ const Dashboard = () => {
       toast.error("Failed to fetch products");
     }
   };
-
-  console.log(products);
 
   // Logout Functionality
   const handleLogout = () => {
@@ -56,21 +58,14 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen flex flex-col items-center p-6 bg-gray-100">
       {/* Navbar */}
-      <div className="w-full flex justify-between items-center bg-blue-600 p-4 text-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 px-4 py-2 rounded-lg hover:bg-red-700 transition"
-        >
-          Logout
-        </button>
-      </div>
+      <Navbar handleLogout={handleLogout} />
 
       {/* Table */}
-      <div className="w-full max-w-4xl mt-6 overflow-x-auto">
-        <table className="w-full bg-white shadow-md rounded-lg">
-          <thead className="bg-blue-500 text-white">
-            <tr>
+      <SubNavbar className="mt-4" />
+      <div className="w-full mt-6 overflow-x-auto bg-white shadow-md rounded-lg max-h-[580px]">
+        <table className="w-full bg-white shadow-md rounded-lg overflow-y-auto">
+          <thead className="bg-blue-500 text-white ">
+            <tr className="">
               <th className="p-3">Product ID</th>
               <th className="p-3">Product Name</th>
               <th className="p-3">Price</th>
@@ -79,7 +74,7 @@ const Dashboard = () => {
               <th className="p-3">Media_URL</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="text-gray-700">
             {products?.length > 0 ? (
               products?.map((product) => (
                 <tr key={product.id} className="border-b">
@@ -93,7 +88,7 @@ const Dashboard = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="4" className="p-3 text-center text-gray-500">
+                <td colSpan="6" className="p-3 text-center text-gray-500">
                   No products found.
                 </td>
               </tr>

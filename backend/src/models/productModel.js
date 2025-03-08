@@ -84,13 +84,13 @@ const ProductModel = {
     try {
       const offset = (page - 1) * limit;
 
-      // Start query with joins
-      let query = `
+      // ✅ Query to fetch paginated products
+      let productQuery = `
         SELECT 
           p.*, 
           c.category_name, 
           GROUP_CONCAT(DISTINCT m.material_name) AS material_names,
-          MIN(pm.url) AS media_url  -- Fetch only one media URL per product
+          MIN(pm.url) AS media_url  
         FROM product p
         LEFT JOIN category c ON p.category_id = c.category_id
         LEFT JOIN material m ON FIND_IN_SET(m.material_id, p.material_ids)
@@ -98,17 +98,34 @@ const ProductModel = {
         WHERE 1=1
       `;
 
-      // Apply filters
+      // ✅ Query to get total count (without LIMIT)
+      let countQuery = `
+          SELECT COUNT(*) AS total_count
+          FROM product
+          WHERE 1=1
+      `;
+
+      // Apply filters to both queries
       if (filters.SKU) {
-        query += ` AND p.SKU LIKE ${db.escape("%" + filters.SKU + "%")}`;
+        const skuFilter = ` AND p.SKU LIKE ${db.escape(
+          "%" + filters.SKU + "%"
+        )}`;
+        productQuery += skuFilter;
+        countQuery += skuFilter;
       }
       if (filters.product_name) {
-        query += ` AND p.product_name LIKE ${db.escape(
+        const nameFilter = ` AND p.product_name LIKE ${db.escape(
           "%" + filters.product_name + "%"
         )}`;
+        productQuery += nameFilter;
+        countQuery += nameFilter;
       }
       if (filters.category_id) {
-        query += ` AND p.category_id = ${db.escape(filters.category_id)}`;
+        const categoryFilter = ` AND p.category_id = ${db.escape(
+          filters.category_id
+        )}`;
+        productQuery += categoryFilter;
+        countQuery += categoryFilter;
       }
       if (filters.material_ids) {
         let materialIdsArray = filters.material_ids;
@@ -122,37 +139,34 @@ const ProductModel = {
             .map((id) => `FIND_IN_SET(${db.escape(id)}, p.material_ids)`)
             .join(" OR ");
 
-          query += ` AND (${findInSetQueries})`;
+          const materialFilter = ` AND (${findInSetQueries})`;
+          productQuery += materialFilter;
+          countQuery += materialFilter;
         }
       }
 
-      // Group by product_id to aggregate materials but keep only one media URL
-      query += ` GROUP BY p.product_id`;
+      // ✅ Group the product query and apply pagination
+      productQuery += ` GROUP BY p.product_id LIMIT ${
+        Number(limit) || 10
+      } OFFSET ${Number(offset) || 0}`;
 
-      // Apply pagination
-      const safeLimit = Number(limit) || 10;
-      const safeOffset = Number(offset) || 0;
-      query += ` LIMIT ${safeLimit} OFFSET ${safeOffset}`;
+      console.log("Executing Product Query:", productQuery);
+      console.log("Executing Count Query:", countQuery);
 
-      console.log("Executing Query:", query);
+      // ✅ Execute both queries
+      const [products] = await db.query(productQuery);
+      const [[{ total_count }]] = await db.query(countQuery); // Fetch total count
 
-      const [products] = await db.query(query);
-
-      // Format material_names as an array, but media_url remains a string
+      // Format material_names as an array
       const formattedProducts = products.map((product) => ({
         ...product,
         material_names: product.material_names
           ? product.material_names.split(",")
           : [],
-        media_url: product.media_url || null, // Keep media_url as a single value
+        media_url: product.media_url || null,
       }));
 
-      console.log(
-        "Products Retrieved:",
-        formattedProducts.length ? formattedProducts : "No products found"
-      );
-
-      return formattedProducts;
+      return { products: formattedProducts, total_count };
     } catch (error) {
       console.error("🚨 Database Query Error:", error);
       throw new Error("Database query failed");
