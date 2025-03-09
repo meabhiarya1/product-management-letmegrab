@@ -39,7 +39,6 @@ const Dashboard = () => {
   const token = localStorage.getItem("token");
   // Fetch products from API
   useEffect(() => {
-    // fetchProducts(currentPage);
     fetchedProductsWithFilter(currentPage);
   }, [currentPage, limit, totalPages, filterWithSubHeader]);
 
@@ -195,6 +194,33 @@ const Dashboard = () => {
     setSelectedProduct(null); // Reset selected product
   };
 
+  const handleDelete = async (product) => {
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_REACT_APP_BACKEND_URL}/api/products/${
+          product.product_id
+        }`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Remove deleted product from the list
+      setProducts((prevProducts) =>
+        prevProducts.filter((p) => p.product_id !== product.product_id)
+      );
+
+      // Recalculate total pages after deletion
+      setTotalPages((prevTotalPages) =>
+        Math.ceil((totalPages * limit - 1) / limit)
+      );
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    }
+  };
+
   // Logout Functionality
   const handleLogout = () => {
     // Remove the token directly from localStorage
@@ -297,8 +323,7 @@ const Dashboard = () => {
                       className="cursor-pointer mx-auto"
                       size={23}
                       onClick={() => {
-                        setSelectedProduct(product);
-                        setOpenModal(!openModal);
+                        handleDelete(product);
                       }}
                     />
                   </td>
