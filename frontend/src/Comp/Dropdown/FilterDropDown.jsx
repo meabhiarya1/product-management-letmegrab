@@ -16,6 +16,19 @@ const FilterDropDown = ({
     Media_URL: "media_url",
     SKU_ID: "SKU_VALUE",
   };
+
+  const filterFun = (product, header) => {
+    setFilterWithSubHeader({
+      filterSubHeader:
+        header === "Category"
+          ? product.category_id
+          : header === "Material"
+          ? product.material_id
+          : product[headerKeyMap[header]],
+      filterHeader: headerKeyMap[header],
+    });
+  };
+
   return (
     <thead className="bg-blue-500 text-white">
       <tr>
@@ -62,12 +75,7 @@ const FilterDropDown = ({
                       <span
                         key={index}
                         className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 border-2 border-gray-100 cursor-pointer"
-                        onClick={() =>
-                          setFilterWithSubHeader({
-                            filterSubHeader: product[headerKeyMap[header]],
-                            filterHeader: header,
-                          })
-                        }
+                        onClick={() => filterFun(product, header)}
                       >
                         {headerKeyMap[header]
                           ? product[headerKeyMap[header]]

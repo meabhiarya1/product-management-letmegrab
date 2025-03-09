@@ -3,10 +3,10 @@ const ProductModel = require("../models/productModel");
 // ✅ Get Products with Pagination & Filters
 exports.getProducts = async (req, res) => {
   try {
-    const { page, limit, SKU, product_name, category_id, material_ids } =
+    const { page, limit, SKU, product_name, category_id, material_id } =
       req.query;
 
-    const filters = { SKU, product_name, category_id, material_ids };
+    const filters = { SKU, product_name, category_id, material_id };
 
     const { products, total_count } = await ProductModel.getProducts(
       page,
@@ -63,7 +63,7 @@ exports.addProduct = async (req, res) => {
       material_name,
       price,
       media_url,
-      SKU_VALUE=SKU
+      (SKU_VALUE = SKU)
     );
 
     res.status(201).json(result);
@@ -76,14 +76,14 @@ exports.addProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     const { product_id } = req.params;
-    const { product_name, category_id, material_ids, price, media_url } =
+    const { product_name, category_id, material_id, price, media_url } =
       req.body;
 
     if (
       !product_id ||
       !product_name ||
       !category_id ||
-      !material_ids ||
+      !material_id ||
       !price
     ) {
       return res
@@ -95,7 +95,7 @@ exports.updateProduct = async (req, res) => {
       product_id,
       product_name,
       category_id,
-      material_ids,
+      material_id,
       price,
       media_url // ✅ Pass media_url to model
     );

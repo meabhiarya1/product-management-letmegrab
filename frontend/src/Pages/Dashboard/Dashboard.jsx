@@ -39,8 +39,9 @@ const Dashboard = () => {
   const token = localStorage.getItem("token");
   // Fetch products from API
   useEffect(() => {
-    fetchProducts(currentPage);
-  }, [currentPage, limit, totalPages]);
+    // fetchProducts(currentPage);
+    fetchedProductsWithFilter(currentPage);
+  }, [currentPage, limit, totalPages, filterWithSubHeader]);
 
   // Reset current page to 1 when dropdown is closed
   useEffect(() => {
@@ -49,23 +50,87 @@ const Dashboard = () => {
     }
   }, [dropDown]);
 
-  console.log(filterWithSubHeader);
-
-  const fetchProducts = async (page) => {
+  const fetchedProductsWithFilter = async (page) => {
     try {
-      const response = await axios.get(
-        `${
-          import.meta.env.VITE_REACT_APP_BACKEND_URL
-        }/api/products?page=${page}&limit=${limit}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Attach token in Authorization header
-          },
-        }
-      );
-      console.log(response.data);
-      setProducts(response?.data?.products);
-      setTotalPages(Math.ceil(response?.data?.total_count / limit));
+      if (filterWithSubHeader.filterHeader === "product_name") {
+        const response = await axios.get(
+          `${
+            import.meta.env.VITE_REACT_APP_BACKEND_URL
+          }/api/products?page=${page}&limit=${limit}&${
+            filterWithSubHeader.filterHeader
+          }=${filterWithSubHeader.filterSubHeader}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Attach token in Authorization header
+            },
+          }
+        );
+        // console.log(response.data);
+        setProducts(response?.data?.products);
+        setTotalPages(Math.ceil(response?.data?.total_count / limit));
+      } else if (filterWithSubHeader.filterHeader === "") {
+        const response = await axios.get(
+          `${
+            import.meta.env.VITE_REACT_APP_BACKEND_URL
+          }/api/products?page=${page}&limit=${limit}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Attach token in Authorization header
+            },
+          }
+        );
+        console.log(response?.data);
+        setProducts(response?.data?.products);
+        setTotalPages(Math.ceil(response?.data?.total_count / limit));
+      } else if (filterWithSubHeader.filterHeader === "SKU_VALUE") {
+        const response = await axios.get(
+          `${
+            import.meta.env.VITE_REACT_APP_BACKEND_URL
+          }/api/products?page=${page}&limit=${limit}&SKU=${
+            filterWithSubHeader.filterSubHeader
+          }`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Attach token in Authorization header
+            },
+          }
+        );
+        console.log(response?.data);
+        setProducts(response?.data?.products);
+        setTotalPages(Math.ceil(response?.data?.total_count / limit));
+      } else if (filterWithSubHeader.filterHeader === "category_name") {
+        const response = await axios.get(
+          `${
+            import.meta.env.VITE_REACT_APP_BACKEND_URL
+          }/api/products?page=${page}&limit=${limit}&category_id=${
+            filterWithSubHeader.filterSubHeader
+          }`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Attach token in Authorization header
+            },
+          }
+        );
+        console.log(response?.data);
+        setProducts(response?.data?.products);
+        setTotalPages(Math.ceil(response?.data?.total_count / limit));
+      } else if (filterWithSubHeader.filterHeader === "material_name") {
+        const response = await axios.get(
+          `${
+            import.meta.env.VITE_REACT_APP_BACKEND_URL
+          }/api/products?page=${page}&limit=${limit}&material_id=${
+            filterWithSubHeader.filterSubHeader
+          }`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Attach token in Authorization header
+            },
+          }
+        );
+        console.log(response?.data);
+        setProducts(response?.data?.products);
+        setTotalPages(Math.ceil(response?.data?.total_count / limit));
+      }
     } catch (error) {
       console.error("Error fetching products:", error);
       console.log(error?.response?.status);
@@ -78,6 +143,36 @@ const Dashboard = () => {
       toast.error("Failed to fetch products");
     }
   };
+
+  console.log(filterWithSubHeader);
+
+  // const fetchProducts = async (page) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${
+  //         import.meta.env.VITE_REACT_APP_BACKEND_URL
+  //       }/api/products?page=${page}&limit=${limit}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`, // Attach token in Authorization header
+  //         },
+  //       }
+  //     );
+  //     console.log(response.data);
+  //     setProducts(response?.data?.products);
+  //     setTotalPages(Math.ceil(response?.data?.total_count / limit));
+  //   } catch (error) {
+  //     console.error("Error fetching products:", error);
+  //     console.log(error?.response?.status);
+  //     if (error?.response?.status === 403) {
+  //       // Unauthorized
+  //       localStorage.removeItem("token");
+  //       toast.error("Token Expired. Please login again");
+  //       navigate("/"); // Redirect to login page
+  //     }
+  //     toast.error("Failed to fetch products");
+  //   }
+  // };
 
   // Handle Add/Update
   const handleSaveProduct = async (createdProduct) => {

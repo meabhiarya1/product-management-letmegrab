@@ -81,53 +81,137 @@ const ProductModel = {
   },
 
   // // ✅ Get All Products with Pagination & Filters
+  // getProducts: async (page, limit, filters) => {
+  //   try {
+  //     const offset = (page - 1) * limit;
+
+  //     // ✅ Query to fetch paginated products
+  //     let productQuery = `
+  //     SELECT
+  //       p.*,
+  //       c.category_name,
+  //       m.material_name,
+  //       MIN(pm.url) AS media_url
+  //     FROM product p
+  //     LEFT JOIN category c ON p.category_id = c.category_id
+  //     LEFT JOIN material m ON p.material_id = m.material_id
+  //     LEFT JOIN product_media pm ON p.product_id = pm.product_id
+  //     WHERE 1=1
+  //   `;
+
+  //     // ✅ Query to get total count (without LIMIT)
+  //     let countQuery = `
+  //         SELECT COUNT(*) AS total_count
+  //         FROM product
+  //         WHERE 1=1
+  //     `;
+
+  //     // Apply filters to both queries
+  //     if (filters.SKU) {
+  //       const skuFilter = ` AND p.SKU_VALUE LIKE ${db.escape(
+  //         "%" + filters.SKU + "%"
+  //       )}`;
+  //       productQuery += skuFilter;
+  //       countQuery += skuFilter;
+  //     }
+
+  //     if (filters.product_name) {
+  //       const nameFilter = ` AND p.product_name LIKE ${db.escape(
+  //         "%" + filters.product_name + "%"
+  //       )}`;
+  //       productQuery += nameFilter;
+  //       countQuery += nameFilter;
+  //     }
+
+  //     if (filters.category_id) {
+  //       const categoryFilter = ` AND p.category_id = ${db.escape(
+  //         filters.category_id
+  //       )}`;
+  //       productQuery += categoryFilter;
+  //       countQuery += categoryFilter;
+  //     }
+
+  //     if (filters.material_id) {
+  //       const materialFilter = ` AND p.material_id = ${db.escape(
+  //         filters.material_id
+  //       )}`;
+  //       productQuery += materialFilter;
+  //       countQuery += materialFilter;
+  //     }
+
+  //     // ✅ Group the product query and apply pagination
+  //     productQuery += ` GROUP BY p.product_id LIMIT ${
+  //       Number(limit) || 10
+  //     } OFFSET ${Number(offset) || 0}`;
+
+  //     console.log("Executing Product Query:", productQuery);
+  //     console.log("Executing Count Query:", countQuery);
+
+  //     // ✅ Execute both queries
+  //     const [products] = await db.query(productQuery);
+  //     const [[{ total_count }]] = await db.query(countQuery); // Fetch total count
+  //     // console.log(products);
+  //     // Format material_names as an array
+  //     // const formattedProducts = products.map((product) => ({
+  //     //   ...product,
+  //     //   material_name: product.material_name || null,
+  //     //   media_url: product.media_url || null,
+  //     //   SKU_VALUE: product.SKU_VALUE,
+  //     // }));
+
+  //     return { products, total_count };
+  //   } catch (error) {
+  //     console.error("🚨 Database Query Error:", error);
+  //     throw new Error("Database query failed");
+  //   }
+  // },
+
   getProducts: async (page, limit, filters) => {
     try {
       const offset = (page - 1) * limit;
 
-      // ✅ Query to fetch paginated products
       let productQuery = `
-      SELECT 
-        p.*, 
-        c.category_name, 
-        m.material_name, 
-        MIN(pm.url) AS media_url  
-      FROM product p
-      LEFT JOIN category c ON p.category_id = c.category_id
-      LEFT JOIN material m ON p.material_id = m.material_id
-      LEFT JOIN product_media pm ON p.product_id = pm.product_id
-      WHERE 1=1
-    `;
-
-      // ✅ Query to get total count (without LIMIT)
-      let countQuery = `
-          SELECT COUNT(*) AS total_count
-          FROM product
-          WHERE 1=1
+        SELECT 
+          p.*, 
+          c.category_name, 
+          m.material_name, 
+          MIN(pm.url) AS media_url  
+        FROM product p
+        LEFT JOIN category c ON p.category_id = c.category_id
+        LEFT JOIN material m ON p.material_id = m.material_id
+        LEFT JOIN product_media pm ON p.product_id = pm.product_id
+        WHERE 1=1
       `;
 
-      // Apply filters to both queries
+      let countQuery = `
+        SELECT COUNT(*) AS total_count
+        FROM product p
+        WHERE 1=1
+      `;
+
       if (filters.SKU) {
-        const skuFilter = ` AND p.SKU LIKE ${db.escape(
-          "%" + filters.SKU + "%"
-        )}`;
+        const skuFilter = ` AND p.SKU_VALUE = ${db.escape(filters.SKU)}`;
         productQuery += skuFilter;
         countQuery += skuFilter;
       }
+
       if (filters.product_name) {
-        const nameFilter = ` AND p.product_name LIKE ${db.escape(
-          "%" + filters.product_name + "%"
+        const nameFilter = ` AND p.product_name = ${db.escape(
+          filters.product_name 
         )}`;
         productQuery += nameFilter;
         countQuery += nameFilter;
       }
+
       if (filters.category_id) {
+        console.log(filters.category_id, "filterss");
         const categoryFilter = ` AND p.category_id = ${db.escape(
           filters.category_id
         )}`;
         productQuery += categoryFilter;
         countQuery += categoryFilter;
       }
+
       if (filters.material_id) {
         const materialFilter = ` AND p.material_id = ${db.escape(
           filters.material_id
@@ -136,7 +220,6 @@ const ProductModel = {
         countQuery += materialFilter;
       }
 
-      // ✅ Group the product query and apply pagination
       productQuery += ` GROUP BY p.product_id LIMIT ${
         Number(limit) || 10
       } OFFSET ${Number(offset) || 0}`;
@@ -144,19 +227,10 @@ const ProductModel = {
       console.log("Executing Product Query:", productQuery);
       console.log("Executing Count Query:", countQuery);
 
-      // ✅ Execute both queries
       const [products] = await db.query(productQuery);
-      const [[{ total_count }]] = await db.query(countQuery); // Fetch total count
-      // console.log(products);
-      // Format material_names as an array
-      const formattedProducts = products.map((product) => ({
-        ...product,
-        material_name: product.material_name || null,
-        media_url: product.media_url || null,
-        SKU_VALUE: product.SKU_VALUE,
-      }));
+      const [[{ total_count }]] = await db.query(countQuery);
 
-      return { products: formattedProducts, total_count };
+      return { products, total_count };
     } catch (error) {
       console.error("🚨 Database Query Error:", error);
       throw new Error("Database query failed");
