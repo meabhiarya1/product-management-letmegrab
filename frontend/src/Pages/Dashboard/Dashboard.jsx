@@ -160,35 +160,7 @@ const Dashboard = () => {
     }
   };
 
-  console.log(filterWithSubHeader);
-
-  // const fetchProducts = async (page) => {
-  //   try {
-  //     const response = await axios.get(
-  //       `${
-  //         import.meta.env.VITE_REACT_APP_BACKEND_URL
-  //       }/api/products?page=${page}&limit=${limit}`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`, // Attach token in Authorization header
-  //         },
-  //       }
-  //     );
-  //     console.log(response.data);
-  //     setProducts(response?.data?.products);
-  //     setTotalPages(Math.ceil(response?.data?.total_count / limit));
-  //   } catch (error) {
-  //     console.error("Error fetching products:", error);
-  //     console.log(error?.response?.status);
-  //     if (error?.response?.status === 403) {
-  //       // Unauthorized
-  //       localStorage.removeItem("token");
-  //       toast.error("Token Expired. Please login again");
-  //       navigate("/"); // Redirect to login page
-  //     }
-  //     toast.error("Failed to fetch products");
-  //   }
-  // };
+  // console.log(filterWithSubHeader);
 
   // Handle Add/Update
   const handleSaveProduct = async (createdProduct) => {
@@ -285,6 +257,7 @@ const Dashboard = () => {
           selectedProduct={selectedProduct}
           handleSaveProduct={handleSaveProduct}
           loader={loader}
+          setSelectedProduct={setSelectedProduct}
         />
       )}
       {/* Table */}

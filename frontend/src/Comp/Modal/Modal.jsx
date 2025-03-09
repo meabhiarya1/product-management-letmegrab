@@ -5,6 +5,7 @@ const Modal = ({
   setOpenModal,
   operation,
   selectedProduct,
+  setSelectedProduct,
   handleSaveProduct,
   loader,
 }) => {
@@ -132,7 +133,10 @@ const Modal = ({
 
         <div className="pt-5 pb-6 px-6 text-right bg-gray-600 -mb-2">
           <button
-            onClick={() => setOpenModal(false)}
+            onClick={() => {
+              setSelectedProduct(null);
+              setOpenModal(false);
+            }}
             className="inline-block w-full sm:w-auto py-3 px-5 mb-2 mr-4 text-center font-semibold leading-6 text-gray-200 bg-gray-500 hover:bg-gray-400 rounded-lg transition duration-200"
           >
             Cancel
