@@ -20,6 +20,10 @@ const Dashboard = () => {
   const [operation, setOperation] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [loader, setLoader] = useState(false);
+  const [filterWithSubHeader, setFilterWithSubHeader] = useState({
+    filterHeader: "",
+    filterSubHeader: "",
+  });
   const headers = [
     "Product ID",
     "Product Name",
@@ -44,6 +48,8 @@ const Dashboard = () => {
       setCurrentPage(1);
     }
   }, [dropDown]);
+
+  console.log(filterWithSubHeader);
 
   const fetchProducts = async (page) => {
     try {
@@ -119,22 +125,40 @@ const Dashboard = () => {
     <div className="min-h-screen flex flex-col items-end p-6 bg-gray-100 ">
       {/* Navbar */}
       <Navbar handleLogout={handleLogout} />
-      <div className="w-[300px] flex justify-between items-end mt-3">
-        <div class="flex justify-center items-center gap-12 h-full">
+
+      {/* Add Product */}
+      <div className="w-[400px] flex justify-between items-end mt-3">
+        <div
+          class="flex justify-center items-center gap-12 h-full"
+          onClick={() => {
+            setOperation("Add");
+            setOpenModal(!openModal);
+          }}
+        >
           <div class="bg-gradient-to-b from-gray-600 to-gray-700 rounded-[8px] px-3 py-2 cursor-pointer">
             <div class="flex gap-2 items-center">
-              <span
-                class="font-semibold text-white"
-                onClick={() => {
-                  setOperation("Add");
-                  setOpenModal(!openModal);
-                }}
-              >
-                Add Product
-              </span>
+              <span class="font-semibold text-white">Add Product</span>
             </div>
           </div>
         </div>
+
+        {/* Clear Filters */}
+        <div
+          class="flex justify-center items-center gap-12 h-full"
+          onClick={() =>
+            setFilterWithSubHeader({
+              filterHeader: "",
+              filterSubHeader: "",
+            })
+          }
+        >
+          <div class="bg-gradient-to-b from-blue-600 to-gray-700 rounded-[8px] px-3 py-2 cursor-pointer">
+            <div class="flex gap-2 items-center">
+              <span class="font-semibold text-white">Clear Filters</span>
+            </div>
+          </div>
+        </div>
+
         <Dropdown
           setDropDown={setDropDown}
           dropDown={dropDown}
@@ -160,6 +184,7 @@ const Dashboard = () => {
             filterDropDown={filterDropDown}
             setFilterDropDown={setFilterDropDown}
             products={products}
+            setFilterWithSubHeader={setFilterWithSubHeader}
           />
 
           <tbody className="text-gray-700">
@@ -170,9 +195,7 @@ const Dashboard = () => {
                   <td className="p-3 text-center">{product.product_name}</td>
                   <td className="p-3 text-center">${product.price}</td>
                   <td className="p-3 text-center">{product.category_name}</td>
-                  <td className="p-3 text-center">
-                    {product.material_name}
-                  </td>
+                  <td className="p-3 text-center">{product.material_name}</td>
                   <td className="p-3 text-center">{product.media_url}</td>
                   <td className="p-3 text-center">{product.SKU_VALUE}</td>
 

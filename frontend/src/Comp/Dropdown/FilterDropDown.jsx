@@ -5,6 +5,7 @@ const FilterDropDown = ({
   filterDropDown,
   setFilterDropDown,
   products,
+  setFilterWithSubHeader,
 }) => {
   // Mapping headers to product keys
   const headerKeyMap = {
@@ -58,14 +59,20 @@ const FilterDropDown = ({
                 <div className="p-2 space-y-2">
                   {products?.map((product, index) => (
                     <div key={index}>
-                        <span
-                          key={index}
-                          className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 border-2 border-gray-100 cursor-pointer"
-                        >
-                          {headerKeyMap[header]
-                            ? product[headerKeyMap[header]]
-                            : "Null"}
-                        </span>
+                      <span
+                        key={index}
+                        className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 border-2 border-gray-100 cursor-pointer"
+                        onClick={() =>
+                          setFilterWithSubHeader({
+                            filterSubHeader: product[headerKeyMap[header]],
+                            filterHeader: header,
+                          })
+                        }
+                      >
+                        {headerKeyMap[header]
+                          ? product[headerKeyMap[header]]
+                          : "Null"}
+                      </span>
                     </div>
                   ))}
                 </div>
