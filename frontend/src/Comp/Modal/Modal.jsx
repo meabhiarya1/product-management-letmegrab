@@ -12,7 +12,7 @@ const Modal = ({
     SKU: "",
     product_name: "",
     category_name: "",
-    material_names: [],
+    material_name: "",
     price: "",
     media_url: "",
   });
@@ -80,17 +80,17 @@ const Modal = ({
 
           {/* Material Names */}
           <div className="flex flex-col mb-4 text-left">
-            <label className="text-gray-100 mb-1">Material Names:</label>
+            <label className="text-gray-100 mb-1">Material Name:</label>
             <input
               className="bg-[#222630] px-4 py-3 outline-none w-full text-white rounded-lg border-2 transition-colors duration-100 border-solid focus:border-[#596A95] border-[#2B3040]"
-              placeholder="Enter Material Names"
+              placeholder="Enter Material Name"
               type="text"
-              value={selectedProduct?.material_names.join(", ")}
+              value={selectedProduct?.material_name}
               required
               onChange={(e) => {
                 setCreatedProduct({
                   ...createdProduct,
-                  material_names: [...createdProduct.material_names, e.target.value],
+                  material_name: e.target.value,
                 });
               }}
             />

@@ -6,6 +6,15 @@ const FilterDropDown = ({
   setFilterDropDown,
   products,
 }) => {
+  // Mapping headers to product keys
+  const headerKeyMap = {
+    "Product Name": "product_name",
+    Price: "price",
+    Category: "category_name",
+    Material: "material_name",
+    Media_URL: "media_url",
+    SKU_ID: "SKU_VALUE",
+  };
   return (
     <thead className="bg-blue-500 text-white">
       <tr>
@@ -13,15 +22,15 @@ const FilterDropDown = ({
           <th
             key={header}
             className="p-3 relative cursor-pointer"
-            onClick={
-              header !== "Operations"
-                ? () => setFilterDropDown(header)
-                : undefined
-            }
+            onClick={() => {
+              if (header !== "Operations" && header !== "Product ID") {
+                setFilterDropDown(header);
+              }
+            }}
           >
             <div className="flex items-center justify-center">
               <span>{header}</span>
-              {header != "Operations" ? (
+              {header !== "Operations" && header !== "Product ID" ? (
                 <div className="relative cursor-pointer">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -41,19 +50,23 @@ const FilterDropDown = ({
               )}
             </div>
 
-            {filterDropDown === header && (
+            {filterDropDown == header && (
               <div
                 className="absolute z-10 mt-2 w-56 rounded-md border border-gray-100 bg-white shadow-lg"
                 role="menu"
               >
                 <div className="p-2 space-y-2">
                   {products?.map((product, index) => (
-                    <span
-                      key={index}
-                      className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 border-2 border-gray-100 cursor-pointer"
-                    >
-                      {product.product_name}
-                    </span>
+                    <div key={index}>
+                        <span
+                          key={index}
+                          className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 border-2 border-gray-100 cursor-pointer"
+                        >
+                          {headerKeyMap[header]
+                            ? product[headerKeyMap[header]]
+                            : "Null"}
+                        </span>
+                    </div>
                   ))}
                 </div>
               </div>

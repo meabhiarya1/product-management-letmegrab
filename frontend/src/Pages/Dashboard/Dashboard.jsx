@@ -25,7 +25,7 @@ const Dashboard = () => {
     "Product Name",
     "Price",
     "Category",
-    "Materials",
+    "Material",
     "Media_URL",
     "SKU_ID",
     "Operations",
