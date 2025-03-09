@@ -80,92 +80,7 @@ const ProductModel = {
     }
   },
 
-  // // ✅ Get All Products with Pagination & Filters
-  // getProducts: async (page, limit, filters) => {
-  //   try {
-  //     const offset = (page - 1) * limit;
-
-  //     // ✅ Query to fetch paginated products
-  //     let productQuery = `
-  //     SELECT
-  //       p.*,
-  //       c.category_name,
-  //       m.material_name,
-  //       MIN(pm.url) AS media_url
-  //     FROM product p
-  //     LEFT JOIN category c ON p.category_id = c.category_id
-  //     LEFT JOIN material m ON p.material_id = m.material_id
-  //     LEFT JOIN product_media pm ON p.product_id = pm.product_id
-  //     WHERE 1=1
-  //   `;
-
-  //     // ✅ Query to get total count (without LIMIT)
-  //     let countQuery = `
-  //         SELECT COUNT(*) AS total_count
-  //         FROM product
-  //         WHERE 1=1
-  //     `;
-
-  //     // Apply filters to both queries
-  //     if (filters.SKU) {
-  //       const skuFilter = ` AND p.SKU_VALUE LIKE ${db.escape(
-  //         "%" + filters.SKU + "%"
-  //       )}`;
-  //       productQuery += skuFilter;
-  //       countQuery += skuFilter;
-  //     }
-
-  //     if (filters.product_name) {
-  //       const nameFilter = ` AND p.product_name LIKE ${db.escape(
-  //         "%" + filters.product_name + "%"
-  //       )}`;
-  //       productQuery += nameFilter;
-  //       countQuery += nameFilter;
-  //     }
-
-  //     if (filters.category_id) {
-  //       const categoryFilter = ` AND p.category_id = ${db.escape(
-  //         filters.category_id
-  //       )}`;
-  //       productQuery += categoryFilter;
-  //       countQuery += categoryFilter;
-  //     }
-
-  //     if (filters.material_id) {
-  //       const materialFilter = ` AND p.material_id = ${db.escape(
-  //         filters.material_id
-  //       )}`;
-  //       productQuery += materialFilter;
-  //       countQuery += materialFilter;
-  //     }
-
-  //     // ✅ Group the product query and apply pagination
-  //     productQuery += ` GROUP BY p.product_id LIMIT ${
-  //       Number(limit) || 10
-  //     } OFFSET ${Number(offset) || 0}`;
-
-  //     console.log("Executing Product Query:", productQuery);
-  //     console.log("Executing Count Query:", countQuery);
-
-  //     // ✅ Execute both queries
-  //     const [products] = await db.query(productQuery);
-  //     const [[{ total_count }]] = await db.query(countQuery); // Fetch total count
-  //     // console.log(products);
-  //     // Format material_names as an array
-  //     // const formattedProducts = products.map((product) => ({
-  //     //   ...product,
-  //     //   material_name: product.material_name || null,
-  //     //   media_url: product.media_url || null,
-  //     //   SKU_VALUE: product.SKU_VALUE,
-  //     // }));
-
-  //     return { products, total_count };
-  //   } catch (error) {
-  //     console.error("🚨 Database Query Error:", error);
-  //     throw new Error("Database query failed");
-  //   }
-  // },
-
+  // ✅ Get All Products with Pagination & Filters
   getProducts: async (page, limit, filters) => {
     try {
       const offset = (page - 1) * limit;
@@ -197,7 +112,7 @@ const ProductModel = {
 
       if (filters.product_name) {
         const nameFilter = ` AND p.product_name = ${db.escape(
-          filters.product_name 
+          filters.product_name + "%"
         )}`;
         productQuery += nameFilter;
         countQuery += nameFilter;
@@ -465,23 +380,51 @@ const ProductModel = {
     }
   },
 
-  // ✅ Get Product Count by Price Range
-  getPriceRangeProductCount: async () => {
+  // ✅ Get Product Price Range
+  getProductsByPriceRange: async (range, page = 1, limit = 10) => {
     try {
-      const query = `
-        SELECT 
-          SUM(CASE WHEN price BETWEEN 0 AND 500 THEN 1 ELSE 0 END) AS '0-500',
-          SUM(CASE WHEN price BETWEEN 501 AND 1000 THEN 1 ELSE 0 END) AS '501-1000',
-          SUM(CASE WHEN price > 1000 THEN 1 ELSE 0 END) AS '1000+'
-        FROM product;
-      `;
+      const validRanges = {
+        "0-500": [0, 500],
+        "501-1000": [501, 1000],
+        "1000+": [1001, Number.MAX_SAFE_INTEGER],
+      };
 
-      const [result] = await db.execute(query);
-      return result[0]; // ✅ Return single row (since it's an aggregated result)
+      if (!validRanges[range]) {
+        throw new Error("Invalid price range");
+      }
+
+      const [minPrice, maxPrice] = validRanges[range];
+
+      const offset = (page - 1) * limit;
+
+      // Query to get paginated products
+      const productQuery = `
+            SELECT * FROM product
+            WHERE price BETWEEN ? AND ?
+            LIMIT ? OFFSET ?;
+        `;
+
+      // Query to get total count of products in the given price range
+      const countQuery = `
+            SELECT COUNT(*) AS total FROM product
+            WHERE price BETWEEN ? AND ?;
+        `;
+
+      const [[{ total }]] = await db.execute(countQuery, [minPrice, maxPrice]);
+      const [products] = await db.execute(productQuery, [
+        minPrice,
+        maxPrice,
+        limit,
+        offset,
+      ]);
+
+      return { products, total };
     } catch (error) {
-      throw error; // Handle error properly
+      console.error("Database Error:", error.message);
+      throw new Error("Failed to fetch products");
     }
   },
+  // http://localhost:5000/api/products/price-range?range=0-500&page=1&limit=10
 
   // ✅ Get Products Without Media
   getProductsWithoutMedia: async () => {

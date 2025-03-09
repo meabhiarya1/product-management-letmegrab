@@ -139,14 +139,31 @@ exports.getCategoryWiseHighestPrice = async (req, res) => {
 };
 
 // ✅ Get Price Range Product Count
-exports.getPriceRangeProductCount = async (req, res) => {
+exports.getProductsByPriceRange = async (req, res) => {
   try {
-    const result = await ProductModel.getPriceRangeProductCount();
-    res.status(200).json(result);
+    const { range, page, limit } = req.query;
+
+    if (!range) {
+      return res.status(400).json({ error: "Price range is required" });
+    }
+
+    // Convert page & limit to integers with default values
+    const pageNumber =
+      Number.isInteger(Number(page)) && Number(page) > 0 ? Number(page) : 1;
+    const limitNumber =
+      Number.isInteger(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
+
+    // Fetch products & total count
+    const { products, total } = await ProductModel.getProductsByPriceRange(
+      range,
+      pageNumber,
+      limitNumber
+    );
+
+    res.status(200).json({ total, products });
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Failed to fetch product count by price range" });
+    console.error("Error fetching products by price range:", error);
+    res.status(500).json({ error: "Failed to fetch products by price range" });
   }
 };
 

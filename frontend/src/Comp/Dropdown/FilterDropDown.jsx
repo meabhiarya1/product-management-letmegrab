@@ -17,13 +17,17 @@ const FilterDropDown = ({
     SKU_ID: "SKU_VALUE",
   };
 
-  const filterFun = (product, header) => {
+  const priceFilter = ["0-500", "501-1000", "1000+"];
+
+  const filterFun = (product, header, index) => {
     setFilterWithSubHeader({
       filterSubHeader:
         header === "Category"
           ? product.category_id
           : header === "Material"
           ? product.material_id
+          : header === "Price"
+          ? priceFilter[index]
           : product[headerKeyMap[header]],
       filterHeader: headerKeyMap[header],
     });
@@ -75,11 +79,14 @@ const FilterDropDown = ({
                       <span
                         key={index}
                         className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 border-2 border-gray-100 cursor-pointer"
-                        onClick={() => filterFun(product, header)}
+                        onClick={() => filterFun(product, header, index)}
                       >
-                        {headerKeyMap[header]
+                        {/* {headerKeyMap[header]
                           ? product[headerKeyMap[header]]
-                          : "Null"}
+                          : "Null"} */}
+                        {headerKeyMap[header] === "price"
+                          ? priceFilter[index]
+                          : product[headerKeyMap[header]]}
                       </span>
                     </div>
                   ))}

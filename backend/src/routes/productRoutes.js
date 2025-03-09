@@ -32,11 +32,11 @@ router.get(
   productController.getCategoryWiseHighestPrice
 ); //Tested
 
-// ✅ Get Product Count by Price Range
+// ✅ Get Product by Price Range
 router.get(
-  "/products/price-range-count",
+  "/products/price-range",
   verifyToken,
-  productController.getPriceRangeProductCount
+  productController.getProductsByPriceRange
 ); //Tested
 
 // ✅ Get Products Without Media

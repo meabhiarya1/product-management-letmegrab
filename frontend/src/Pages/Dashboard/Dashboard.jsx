@@ -130,6 +130,22 @@ const Dashboard = () => {
         console.log(response?.data);
         setProducts(response?.data?.products);
         setTotalPages(Math.ceil(response?.data?.total_count / limit));
+      } else if (filterWithSubHeader.filterHeader === "price") {
+        const response = await axios.get(
+          `${
+            import.meta.env.VITE_REACT_APP_BACKEND_URL
+          }/api/products/page=${page}&limit=${limit}/price-range-count&range=${
+            filterWithSubHeader.filterSubHeader
+          }`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Attach token in Authorization header
+            },
+          }
+        );
+        console.log(response?.data);
+        setProducts(response?.data?.products);
+        setTotalPages(Math.ceil(response?.data?.total_count / limit));
       }
     } catch (error) {
       console.error("Error fetching products:", error);
