@@ -210,7 +210,7 @@ const Dashboard = () => {
           }
         );
         console.log(response);
-        setProducts([...products, createdProduct]);
+        setProducts([...products, response?.data?.product]);
         toast.success("Product saved successfully");
       } catch (error) {
         console.error("Error saving product:", error);
@@ -219,7 +219,7 @@ const Dashboard = () => {
         setLoader(false);
       }
     }
-    setIsModalOpen(false); // Close modal
+    setOpenModal(false); // Close modal
     setSelectedProduct(null); // Reset selected product
   };
 

@@ -260,7 +260,21 @@ const ProductModel = {
       }
 
       await connection.commit(); // ✅ Commit transaction
-      return { message: "Product added successfully" };
+      return {
+        message: "Product added successfully",
+        product: {
+          product_id,
+          SKU: encryptedSKU,
+          SKU_VALUE,
+          product_name,
+          category_id,
+          material_id,
+          price,
+          media_url,
+          category_name,
+          material_name,
+        },
+      };
     } catch (error) {
       await connection.rollback(); // ❌ Rollback transaction on error
       throw error;
