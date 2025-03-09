@@ -26,7 +26,7 @@ exports.getProducts = async (req, res) => {
 // ✅ Add Product
 exports.addProduct = async (req, res) => {
   try {
-    let { SKU, product_name, category_name, material_names, price, media_url } =
+    let { SKU, product_name, category_name, material_name, price, media_url } =
       req.body;
 
     // ✅ Check for missing fields
@@ -34,7 +34,7 @@ exports.addProduct = async (req, res) => {
       !SKU ||
       !product_name ||
       !category_name ||
-      !material_names ||
+      !material_name ||
       price === undefined
     ) {
       return res
@@ -60,7 +60,7 @@ exports.addProduct = async (req, res) => {
       SKU,
       product_name,
       category_name,
-      material_names,
+      material_name,
       price,
       media_url,
       SKU_VALUE=SKU

@@ -171,7 +171,7 @@ const Dashboard = () => {
                   <td className="p-3 text-center">${product.price}</td>
                   <td className="p-3 text-center">{product.category_name}</td>
                   <td className="p-3 text-center">
-                    {product.material_names.join(" ")}
+                    {product.material_name}
                   </td>
                   <td className="p-3 text-center">{product.media_url}</td>
                   <td className="p-3 text-center">{product.SKU_VALUE}</td>

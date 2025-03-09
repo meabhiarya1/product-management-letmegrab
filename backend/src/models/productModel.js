@@ -49,7 +49,7 @@ const ProductModel = {
           SKU_VALUE VARCHAR(255) NOT NULL UNIQUE,
           product_name VARCHAR(255) NOT NULL,
           category_id INT NOT NULL,
-          material_ids VARCHAR(255) NOT NULL,
+          material_id INT NOT NULL,
           price FLOAT NOT NULL,
           FOREIGN KEY (category_id) REFERENCES category(category_id) ON DELETE CASCADE
         )
@@ -87,17 +87,17 @@ const ProductModel = {
 
       // ✅ Query to fetch paginated products
       let productQuery = `
-        SELECT 
-          p.*, 
-          c.category_name, 
-          GROUP_CONCAT(DISTINCT m.material_name) AS material_names,
-          MIN(pm.url) AS media_url  
-        FROM product p
-        LEFT JOIN category c ON p.category_id = c.category_id
-        LEFT JOIN material m ON FIND_IN_SET(m.material_id, p.material_ids)
-        LEFT JOIN product_media pm ON p.product_id = pm.product_id
-        WHERE 1=1
-      `;
+      SELECT 
+        p.*, 
+        c.category_name, 
+        m.material_name, 
+        MIN(pm.url) AS media_url  
+      FROM product p
+      LEFT JOIN category c ON p.category_id = c.category_id
+      LEFT JOIN material m ON p.material_id = m.material_id
+      LEFT JOIN product_media pm ON p.product_id = pm.product_id
+      WHERE 1=1
+    `;
 
       // ✅ Query to get total count (without LIMIT)
       let countQuery = `
@@ -128,22 +128,12 @@ const ProductModel = {
         productQuery += categoryFilter;
         countQuery += categoryFilter;
       }
-      if (filters.material_ids) {
-        let materialIdsArray = filters.material_ids;
-
-        if (typeof materialIdsArray === "string") {
-          materialIdsArray = materialIdsArray.split(",").map((id) => id.trim());
-        }
-
-        if (Array.isArray(materialIdsArray) && materialIdsArray.length > 0) {
-          const findInSetQueries = materialIdsArray
-            .map((id) => `FIND_IN_SET(${db.escape(id)}, p.material_ids)`)
-            .join(" OR ");
-
-          const materialFilter = ` AND (${findInSetQueries})`;
-          productQuery += materialFilter;
-          countQuery += materialFilter;
-        }
+      if (filters.material_id) {
+        const materialFilter = ` AND p.material_id = ${db.escape(
+          filters.material_id
+        )}`;
+        productQuery += materialFilter;
+        countQuery += materialFilter;
       }
 
       // ✅ Group the product query and apply pagination
@@ -161,11 +151,9 @@ const ProductModel = {
       // Format material_names as an array
       const formattedProducts = products.map((product) => ({
         ...product,
-        material_names: product.material_names
-          ? product.material_names.split(",")
-          : [],
+        material_name: product.material_name || null,
         media_url: product.media_url || null,
-        SKU_VALUE: product.SKU_VALUE, // Decrypt SKU
+        SKU_VALUE: product.SKU_VALUE,
       }));
 
       return { products: formattedProducts, total_count };
@@ -180,7 +168,7 @@ const ProductModel = {
     SKU,
     product_name,
     category_name,
-    materials,
+    material_name,
     price,
     media_url,
     SKU_VALUE
@@ -216,28 +204,44 @@ const ProductModel = {
         category_id = insertCategory.insertId;
       }
 
-      const materialIds = [];
-      for (let material_name of materials) {
-        let [materialResult] = await connection.execute(
-          "SELECT material_id FROM material WHERE material_name = ?",
+      let [materialResult] = await connection.execute(
+        "SELECT material_id FROM material WHERE material_name = ?",
+        [material_name]
+      );
+
+      let material_id;
+      if (materialResult.length > 0) {
+        material_id = materialResult[0].material_id;
+      } else {
+        const [insertMaterial] = await connection.execute(
+          "INSERT INTO material (material_name) VALUES (?)",
           [material_name]
         );
-
-        let material_id;
-        if (materialResult.length > 0) {
-          material_id = materialResult[0].material_id;
-        } else {
-          const [insertMaterial] = await connection.execute(
-            "INSERT INTO material (material_name) VALUES (?)",
-            [material_name]
-          );
-          material_id = insertMaterial.insertId;
-        }
-        materialIds.push(material_id);
+        material_id = insertMaterial.insertId;
       }
 
+      // const materialIds = [];
+      // for (let material_name of materials) {
+      //   let [materialResult] = await connection.execute(
+      //     "SELECT material_id FROM material WHERE material_name = ?",
+      //     [material_name]
+      //   );
+
+      //   let material_id;
+      //   if (materialResult.length > 0) {
+      //     material_id = materialResult[0].material_id;
+      //   } else {
+      //     const [insertMaterial] = await connection.execute(
+      //       "INSERT INTO material (material_name) VALUES (?)",
+      //       [material_name]
+      //     );
+      //     material_id = insertMaterial.insertId;
+      //   }
+      //   materialIds.push(material_id);
+      // }
+
       const insertProductQuery = `
-        INSERT INTO product (SKU, SKU_VALUE, product_name, category_id, material_ids, price)
+        INSERT INTO product (SKU, SKU_VALUE, product_name, category_id, material_id, price)
         VALUES (?, ?, ?, ?, ?, ?)
       `;
       const [productResult] = await connection.execute(insertProductQuery, [
@@ -245,7 +249,7 @@ const ProductModel = {
         SKU_VALUE,
         product_name,
         category_id,
-        materialIds.join(","), // Convert array to comma-separated string
+        material_id,
         price,
       ]);
 
@@ -307,7 +311,7 @@ const ProductModel = {
     product_id,
     product_name,
     category_id,
-    material_ids,
+    material_id,
     price,
     media_url
   ) => {
@@ -318,14 +322,14 @@ const ProductModel = {
       // Update product details
       const updateProductQuery = `
         UPDATE product
-        SET product_name = ?, category_id = ?, material_ids = ?, price = ?
+        SET product_name = ?, category_id = ?, material_id = ?, price = ?
         WHERE product_id = ?
       `;
 
       const [productResult] = await connection.execute(updateProductQuery, [
         product_name,
         category_id,
-        material_ids,
+        material_id,
         price,
         product_id,
       ]);

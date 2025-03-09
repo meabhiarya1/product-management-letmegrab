@@ -21,9 +21,9 @@ const Modal = ({
       className="fixed inset-0 flex items-center justify-center bg-blur bg-opacity-50"
       style={{ zIndex: 100 }}
     >
-      <div className="max-w-xl w-full mx-auto bg-gray-600 rounded-xl overflow-hidden">
+      <div className="max-w-lg w-full mx-auto bg-gray-600 rounded-xl overflow-hidden">
         <div className="max-w-md mx-auto pt-12 pb-14 px-5 text-center">
-          <h4 className="text-xl text-gray-100 font-semibold mb-5">
+          <h4 className="text-md text-gray-100 font-semibold mb-5">
             {operation} Product
           </h4>
 
