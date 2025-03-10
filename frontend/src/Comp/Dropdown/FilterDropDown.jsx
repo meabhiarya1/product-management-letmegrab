@@ -1,13 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 
 const FilterDropDown = ({
   headers,
-  filterDropDown,
   setFilterDropDown,
   products,
   setFilterWithSubHeader,
 }) => {
-  // Mapping headers to product keys
+  const [activeDropdown, setActiveDropdown] = useState(null); // State to toggle dropdown
+
   const headerKeyMap = {
     "Product Name": "product_name",
     Price: "price",
@@ -33,6 +33,7 @@ const FilterDropDown = ({
           : product[headerKeyMap[header]],
       filterHeader: headerKeyMap[header],
     });
+    setActiveDropdown(null);  
   };
 
   return (
@@ -51,7 +52,15 @@ const FilterDropDown = ({
             <div className="flex items-center justify-center">
               <span>{header}</span>
               {header !== "Operations" && header !== "Product ID" ? (
-                <div className="relative cursor-pointer">
+                <div
+                  className="relative cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();  
+                    setActiveDropdown(
+                      activeDropdown === header ? null : header
+                    );
+                  }}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="size-4 ml-2"
@@ -70,7 +79,7 @@ const FilterDropDown = ({
               )}
             </div>
 
-            {filterDropDown == header && (
+            {activeDropdown === header && (
               <div
                 className="absolute z-10 mt-2 w-56 rounded-md border border-gray-100 bg-white shadow-lg"
                 role="menu"
@@ -83,9 +92,6 @@ const FilterDropDown = ({
                         className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 border-2 border-gray-100 cursor-pointer"
                         onClick={() => filterFun(product, header, index)}
                       >
-                        {/* {headerKeyMap[header]
-                          ? product[headerKeyMap[header]]
-                          : "Null"} */}
                         {headerKeyMap[header] === "price"
                           ? priceFilter[index]
                           : headerKeyMap[header] === "media_url"

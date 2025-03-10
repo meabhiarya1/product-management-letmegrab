@@ -336,6 +336,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+        
         {categoryWiseHighestPrice && (
           <CategoryWiseHighestPriceModal
             setCategoryWiseHighestPrice={setCategoryWiseHighestPrice}
@@ -368,6 +369,7 @@ const Dashboard = () => {
           limit={limit}
         />
       </div>
+      
       {/* Modal */}
       {openModal && (
         <Modal
@@ -379,12 +381,12 @@ const Dashboard = () => {
           setSelectedProduct={setSelectedProduct}
         />
       )}
+
       {/* Table */}
       <div className="w-full mt-2 overflow-x-auto bg-white shadow-md rounded-lg max-h-[580px] min-h-[200px]">
         <table className="w-full bg-white shadow-md rounded-lg overflow-y-auto">
           <FilterDropDown
             headers={headers}
-            filterDropDown={filterDropDown}
             setFilterDropDown={setFilterDropDown}
             products={products}
             setFilterWithSubHeader={setFilterWithSubHeader}
@@ -432,6 +434,8 @@ const Dashboard = () => {
           </tbody>
         </table>
       </div>
+
+
       {/* Pagination */}
       <div className="mt-4 flex gap-2 items-center">
         <button
