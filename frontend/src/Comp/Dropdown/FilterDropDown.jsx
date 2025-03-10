@@ -17,7 +17,7 @@ const FilterDropDown = ({
     SKU_ID: "SKU_VALUE",
   };
 
-  const priceFilter = ["0-500", "501-1000", "1000+"];
+  const priceFilter = ["0-500", "501-1000", "1000"];
 
   const filterFun = (product, header, index) => {
     setFilterWithSubHeader({

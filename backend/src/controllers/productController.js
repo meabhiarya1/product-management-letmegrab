@@ -178,13 +178,11 @@ exports.getProductsByPriceRange = async (req, res) => {
       return res.status(400).json({ error: "Price range is required" });
     }
 
-    // Convert page & limit to integers with default values
     const pageNumber =
       Number.isInteger(Number(page)) && Number(page) > 0 ? Number(page) : 1;
     const limitNumber =
       Number.isInteger(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
 
-    // Fetch products & total count
     const { products, total } = await ProductModel.getProductsByPriceRange(
       range,
       pageNumber,

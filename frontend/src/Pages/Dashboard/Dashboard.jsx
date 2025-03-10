@@ -133,7 +133,7 @@ const Dashboard = () => {
         const response = await axios.get(
           `${
             import.meta.env.VITE_REACT_APP_BACKEND_URL
-          }/api/products/page=${page}&limit=${limit}/price-range-count&range=${
+          }/api/products/price-range?page=${page}&limit=${limit}&range=${
             filterWithSubHeader.filterSubHeader
           }`,
           {

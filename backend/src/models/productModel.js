@@ -432,50 +432,148 @@ const ProductModel = {
   },
 
   // ✅ Get Product Price Range
+  // getProductsByPriceRange: async (range, page = 1, limit = 10) => {
+  //   try {
+  //     const validRanges = {
+  //       "0-500": [0, 500],
+  //       "501-1000": [501, 1000],
+  //       "1000+": [1001, Number.MAX_SAFE_INTEGER],
+  //     };
+
+  //     if (!validRanges[range]) {
+  //       throw new Error("Invalid price range");
+  //     }
+
+  //     let [minPrice, maxPrice] = validRanges[range];
+
+  //     // Ensure numbers are correctly formatted
+  //     minPrice = parseFloat(minPrice);
+  //     maxPrice = parseFloat(maxPrice);
+  //     limit = parseInt(limit);
+  //     const offset = (parseInt(page) - 1) * limit;
+
+  //     console.log("Fetching products in range:", minPrice, "-", maxPrice);
+
+  //     const productQuery = `
+  //     SELECT * FROM product
+  //     WHERE price >= ? AND price <= ?
+  //     LIMIT ? OFFSET ?;
+  // `;
+
+  //     const countQuery = `
+  //     SELECT COUNT(*) AS total FROM product
+  //     WHERE price >= ? AND price <= ?;
+  // `;
+
+  //     const [[{ total }]] = await db.execute(countQuery, [minPrice, maxPrice]);
+  //     const [products] = await db.execute(productQuery, [
+  //       minPrice,
+  //       maxPrice,
+  //       limit,
+  //       offset,
+  //     ]);
+
+  //     return { products, total };
+  //   } catch (error) {
+  //     console.error("Database Error:", error.message);
+  //     throw new Error("Failed to fetch products");
+  //   }
+  // },
+  // getProductsByPriceRange: async (range, page = 1, limit = 10) => {
+  //   try {
+  //     const validRanges = {
+  //       "0-500": [0, 500],
+  //       "501-1000": [501, 1000],
+  //       "1000+": [1001, Number.MAX_SAFE_INTEGER],
+  //     };
+
+  //     if (!validRanges[range]) {
+  //       throw new Error("Invalid price range");
+  //     }
+
+  //     let [minPrice, maxPrice] = validRanges[range];
+
+  //     // Ensure numbers are correctly formatted
+  //     minPrice = parseFloat(minPrice);
+  //     maxPrice = parseFloat(maxPrice);
+  //     limit = parseInt(limit);
+  //     const offset = (parseInt(page) - 1) * limit;
+
+  //     console.log("Fetching products in range:", minPrice, "-", maxPrice);
+
+  //     const productQuery = `
+  //       SELECT * FROM product
+  //       WHERE price >= ? AND price <= ?
+  //       LIMIT ? OFFSET ?;
+  //     `;
+
+  //     const countQuery = `
+  //       SELECT COUNT(*) AS total FROM product
+  //       WHERE price >= ? AND price <= ?;
+  //     `;
+
+  //     // Execute queries with correct parameter types
+  //     const [[{ total }]] = await db.execute(countQuery, [minPrice, maxPrice]);
+  //     const [products] = await db.execute(productQuery, [
+  //       minPrice,
+  //       maxPrice,
+  //       limit, // Ensure this is an integer
+  //       offset, // Ensure this is an integer
+  //     ]);
+
+  //     return { products, total };
+  //   } catch (error) {
+  //     console.error("Database Error:", error.message);
+  //     throw new Error("Failed to fetch products");
+  //   }
+  // },
   getProductsByPriceRange: async (range, page = 1, limit = 10) => {
     try {
       const validRanges = {
         "0-500": [0, 500],
         "501-1000": [501, 1000],
-        "1000+": [1001, Number.MAX_SAFE_INTEGER],
+        "1000": [1001, Number.MAX_SAFE_INTEGER],
       };
+
+      const rangeKey = decodeURIComponent(range);
 
       if (!validRanges[range]) {
         throw new Error("Invalid price range");
       }
-
-      const [minPrice, maxPrice] = validRanges[range];
-
-      const offset = (page - 1) * limit;
-
-      // Query to get paginated products
+  
+      let [minPrice, maxPrice] = validRanges[range];
+  
+      minPrice = parseFloat(minPrice);
+      maxPrice = parseFloat(maxPrice);
+      limit = Number.parseInt(limit, 10);
+      const offset = (Number.parseInt(page, 10) - 1) * limit;
+  
+      console.log("Fetching products in range:", minPrice, "-", maxPrice);
+      console.log("Limit:", limit, "Offset:", offset);
+  
+      // ✅ Use string interpolation for LIMIT & OFFSET (avoid prepared statement issues)
       const productQuery = `
-            SELECT * FROM product
-            WHERE price BETWEEN ? AND ?
-            LIMIT ? OFFSET ?;
-        `;
-
-      // Query to get total count of products in the given price range
+        SELECT * FROM product
+        WHERE price BETWEEN ? AND ?
+        LIMIT ${limit} OFFSET ${offset}; 
+      `;
+  
       const countQuery = `
-            SELECT COUNT(*) AS total FROM product
-            WHERE price BETWEEN ? AND ?;
-        `;
-
+        SELECT COUNT(*) AS total FROM product
+        WHERE price BETWEEN ? AND ?;
+      `;
+  
       const [[{ total }]] = await db.execute(countQuery, [minPrice, maxPrice]);
-      const [products] = await db.execute(productQuery, [
-        minPrice,
-        maxPrice,
-        limit,
-        offset,
-      ]);
-
+      const [products] = await db.execute(productQuery, [minPrice, maxPrice]);
+  
       return { products, total };
     } catch (error) {
       console.error("Database Error:", error.message);
       throw new Error("Failed to fetch products");
     }
-  },
-  // http://localhost:5000/api/products/price-range?range=0-500&page=1&limit=10
+  }
+  
+  
 };
 
 module.exports = ProductModel;
