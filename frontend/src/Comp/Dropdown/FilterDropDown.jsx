@@ -33,7 +33,7 @@ const FilterDropDown = ({
           : product[headerKeyMap[header]],
       filterHeader: headerKeyMap[header],
     });
-    setActiveDropdown(null);  
+    setActiveDropdown(null);
   };
 
   return (
@@ -55,7 +55,7 @@ const FilterDropDown = ({
                 <div
                   className="relative cursor-pointer"
                   onClick={(e) => {
-                    e.stopPropagation();  
+                    e.stopPropagation();
                     setActiveDropdown(
                       activeDropdown === header ? null : header
                     );
@@ -85,10 +85,20 @@ const FilterDropDown = ({
                 role="menu"
               >
                 <div className="p-2 space-y-2">
-                  {products?.map((product, index) => (
+                  {[
+                    ...new Map(
+                      products.map((product) => [
+                        headerKeyMap[header] === "price"
+                          ? priceFilter[products.indexOf(product)]
+                          : headerKeyMap[header] === "media_url"
+                          ? "Null"
+                          : product[headerKeyMap[header]],
+                        product,
+                      ])
+                    ).values(),
+                  ].map((product, index) => (
                     <div key={index}>
                       <span
-                        key={index}
                         className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 border-2 border-gray-100 cursor-pointer"
                         onClick={() => filterFun(product, header, index)}
                       >
