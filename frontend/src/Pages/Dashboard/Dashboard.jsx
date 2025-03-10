@@ -8,6 +8,7 @@ import FilterDropDown from "../../Comp/Dropdown/FilterDropDown";
 import Modal from "../../Comp/Modal/Modal";
 import { FaEdit } from "react-icons/fa";
 import { MdAutoDelete } from "react-icons/md";
+import CategoryWiseHighestPriceModal from "../../Comp/Modal/CategoryWiseHighestPriceModal";
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
@@ -20,10 +21,13 @@ const Dashboard = () => {
   const [operation, setOperation] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [loader, setLoader] = useState(false);
+  const [categoryWiseHighestPrice, setCategoryWiseHighestPrice] =
+    useState(false);
   const [filterWithSubHeader, setFilterWithSubHeader] = useState({
     filterHeader: "",
     filterSubHeader: "",
   });
+  const [highestData, setHighestData] = useState([]);
   const headers = [
     "Product ID",
     "Product Name",
@@ -173,7 +177,35 @@ const Dashboard = () => {
     }
   };
 
-  console.log(filterWithSubHeader);
+  const handleCategoryWiseHighestPrice = async () => {
+    try {
+      setCategoryWiseHighestPrice(!categoryWiseHighestPrice);
+      const response = await axios.get(
+        `${
+          import.meta.env.VITE_REACT_APP_BACKEND_URL
+        }/api/products/category-wise-highest-price`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach token in Authorization header
+          },
+        }
+      );
+      console.log(response?.data);
+      setHighestData(response?.data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      console.log(error?.response?.status);
+      if (error?.response?.status === 403) {
+        // Unauthorized
+        localStorage.removeItem("token");
+        toast.error("Token Expired. Please login again");
+        navigate("/"); // Redirect to login page
+      }
+      toast.error("Failed to fetch products");
+    }
+  };
+
+  // console.log(filterWithSubHeader);
 
   // Handle Add/Update
   const handleSaveProduct = async (product) => {
@@ -276,7 +308,7 @@ const Dashboard = () => {
       <Navbar handleLogout={handleLogout} />
 
       {/* Add Product */}
-      <div className="w-[400px] flex justify-between items-end mt-3">
+      <div className="w-[500px] flex justify-between items-end mt-3">
         <div
           class="flex justify-center items-center gap-12 h-full"
           onClick={() => {
@@ -290,6 +322,28 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* CategoryWiseHighestPrice */}
+        <div
+          class="flex justify-center items-center gap-12 h-full"
+          onClick={() => {
+            handleCategoryWiseHighestPrice();
+          }}
+        >
+          {" "}
+          <div class="bg-gradient-to-b from-blue-400 to-gray-700 rounded-[8px] px-3 py-2 cursor-pointer">
+            <div class="flex gap-2 items-center">
+              <span class="font-semibold text-white">Highest Price</span>
+            </div>
+          </div>
+        </div>
+        {categoryWiseHighestPrice && (
+          <CategoryWiseHighestPriceModal
+            setCategoryWiseHighestPrice={setCategoryWiseHighestPrice}
+            categoryWiseHighestPrice={categoryWiseHighestPrice}
+            highestData={highestData}
+          />
+        )}
 
         {/* Clear Filters */}
         <div
@@ -315,6 +369,7 @@ const Dashboard = () => {
           limit={limit}
         />
       </div>
+
       {/* Modal */}
       {openModal && (
         <Modal
