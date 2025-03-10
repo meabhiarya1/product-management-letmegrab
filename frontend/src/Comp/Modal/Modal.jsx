@@ -17,6 +17,19 @@ const Modal = ({
     price: "",
     media_url: "",
   });
+
+  const handlePriceChange = (e) => {
+    const value = e.target.value;
+
+    // Updated regex: Allows digits and ensures only one decimal point
+    if (/^\d*\.?\d*$/.test(value) || value === ".") {
+      setSelectedProduct({
+        ...selectedProduct,
+        price: parseFloat(value) // Store as string to prevent premature conversion
+      });
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 flex items-center justify-center bg-blur bg-opacity-50 p-4"
@@ -134,10 +147,7 @@ const Modal = ({
                 onChange={(e) =>
                   (selectedProduct ?? createdProduct) &&
                   (selectedProduct
-                    ? setSelectedProduct({
-                        ...selectedProduct,
-                        price: Number(e.target.value),
-                      })
+                    ? handlePriceChange(e)
                     : setCreatedProduct({
                         ...createdProduct,
                         price: Number(e.target.value),
