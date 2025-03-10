@@ -419,10 +419,9 @@ const ProductModel = {
         SELECT p.*
         FROM product p
         LEFT JOIN product_media pm ON p.product_id = pm.product_id
-        WHERE pm.product_id IS NULL OR pm.url IS NULL
+        WHERE pm.url IS NULL OR pm.url = '';
       `;
       const [products] = await db.execute(query);
-      console.log("Products without media:", products);
       return products;
     } catch (error) {
       console.error("🚨 Database Query Error:", error);
