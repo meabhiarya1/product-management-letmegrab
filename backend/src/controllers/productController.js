@@ -90,7 +90,11 @@ exports.updateProduct = async (req, res) => {
         .status(400)
         .json({ error: "All fields are required except media_url" });
     }
-    if (typeof price !== "number" || isNaN(price) || price <= 0) {
+
+    // ✅ Convert empty string `""` price to NaN for proper validation
+    Number(price);
+
+    if (typeof price !== "number" || isNaN(price) || price <= 0 || !price) {
       return res.status(400).json({ error: "Invalid price value" });
     }
 

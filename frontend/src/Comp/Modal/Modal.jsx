@@ -131,8 +131,9 @@ const Modal = ({
                 type="text"
                 value={selectedProduct?.price}
                 required
-                onChange={(e) => {
-                  selectedProduct
+                onChange={(e) =>
+                  (selectedProduct ?? createdProduct) &&
+                  (selectedProduct
                     ? setSelectedProduct({
                         ...selectedProduct,
                         price: Number(e.target.value),
@@ -140,8 +141,8 @@ const Modal = ({
                     : setCreatedProduct({
                         ...createdProduct,
                         price: Number(e.target.value),
-                      });
-                }}
+                      }))
+                }
               />
             </div>
 

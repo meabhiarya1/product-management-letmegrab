@@ -184,17 +184,16 @@ const Dashboard = () => {
             p.product_id === product.product_id ? { ...p, ...product } : p
           )
         );
-
         toast.success("Product Updated successfully");
-      } catch {
+        setOpenModal(false); // Close modal
+        setSelectedProduct(null); // Reset selected product
+        setOperation("");
+      } catch (error) {
         console.error("Error saving product:", error);
         toast.error(error.response.data.error || "Failed to update product");
       } finally {
         setLoader(false);
       }
-      setOpenModal(false); // Close modal
-      setSelectedProduct(null); // Reset selected product
-      setOperation("");
     } else if (product && operation === "Add") {
       try {
         const response = await axios.post(
@@ -209,15 +208,15 @@ const Dashboard = () => {
         console.log(response);
         setProducts([...products, response?.data?.product]);
         toast.success("Product saved successfully");
+        setOpenModal(false); // Close modal
+        setSelectedProduct(null); // Reset selected product
+        setOperation("");
       } catch (error) {
         console.error("Error saving product:", error);
         toast.error(error.response.data.error || "Failed to save product");
       } finally {
         setLoader(false);
       }
-      setOpenModal(false); // Close modal
-      setSelectedProduct(null); // Reset selected product
-      setOperation("");
     }
   };
 
