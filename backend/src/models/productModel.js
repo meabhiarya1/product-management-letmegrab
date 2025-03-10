@@ -387,6 +387,31 @@ const ProductModel = {
         await connection.execute(updateMediaQuery, [media_url, product_id]);
       }
 
+      // ✅ Only update category & material names if they exist
+      if (category_name && material_name) {
+        const updateCategoryQuery = `
+        UPDATE category
+        SET category_name = ?
+        WHERE category_id = ?
+      `;
+
+        const updateMaterialQuery = `
+          UPDATE material
+          SET material_name = ?
+          WHERE material_id = ?
+        `;
+
+        await connection.execute(updateMaterialQuery, [
+          material_name,
+          material_id,
+        ]);
+
+        await connection.execute(updateCategoryQuery, [
+          category_name,
+          product_id,
+        ]);
+      }
+
       await connection.commit(); // ✅ Commit transaction
       return { message: "Product updated successfully" };
     } catch (error) {
@@ -532,7 +557,7 @@ const ProductModel = {
       const validRanges = {
         "0-500": [0, 500],
         "501-1000": [501, 1000],
-        "1000": [1001, Number.MAX_SAFE_INTEGER],
+        1000: [1001, Number.MAX_SAFE_INTEGER],
       };
 
       const rangeKey = decodeURIComponent(range);
@@ -540,40 +565,38 @@ const ProductModel = {
       if (!validRanges[range]) {
         throw new Error("Invalid price range");
       }
-  
+
       let [minPrice, maxPrice] = validRanges[range];
-  
+
       minPrice = parseFloat(minPrice);
       maxPrice = parseFloat(maxPrice);
       limit = Number.parseInt(limit, 10);
       const offset = (Number.parseInt(page, 10) - 1) * limit;
-  
+
       console.log("Fetching products in range:", minPrice, "-", maxPrice);
       console.log("Limit:", limit, "Offset:", offset);
-  
+
       // ✅ Use string interpolation for LIMIT & OFFSET (avoid prepared statement issues)
       const productQuery = `
         SELECT * FROM product
         WHERE price BETWEEN ? AND ?
         LIMIT ${limit} OFFSET ${offset}; 
       `;
-  
+
       const countQuery = `
         SELECT COUNT(*) AS total FROM product
         WHERE price BETWEEN ? AND ?;
       `;
-  
+
       const [[{ total }]] = await db.execute(countQuery, [minPrice, maxPrice]);
       const [products] = await db.execute(productQuery, [minPrice, maxPrice]);
-  
+
       return { products, total };
     } catch (error) {
       console.error("Database Error:", error.message);
       throw new Error("Failed to fetch products");
     }
-  }
-  
-  
+  },
 };
 
 module.exports = ProductModel;

@@ -40,7 +40,7 @@ const Dashboard = () => {
   // Fetch products from API
   useEffect(() => {
     fetchedProductsWithFilter(currentPage);
-  }, [currentPage, limit, totalPages, filterWithSubHeader]);
+  }, [currentPage, limit, totalPages, filterWithSubHeader, openModal]);
 
   // Reset current page to 1 when dropdown is closed
   useEffect(() => {
