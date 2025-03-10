@@ -390,9 +390,9 @@ const ProductModel = {
       // ✅ Only update category & material names if they exist
       if (category_name && material_name) {
         const updateCategoryQuery = `
-        UPDATE category
-        SET category_name = ?
-        WHERE category_id = ?
+          UPDATE category
+          SET category_name = ?
+          WHERE category_id = ?
       `;
 
         const updateMaterialQuery = `
@@ -408,7 +408,7 @@ const ProductModel = {
 
         await connection.execute(updateCategoryQuery, [
           category_name,
-          product_id,
+          category_id,
         ]);
       }
 
