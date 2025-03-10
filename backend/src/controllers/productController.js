@@ -80,6 +80,8 @@ exports.updateProduct = async (req, res) => {
       SKU_VALUE,
       product_name,
       category_id,
+      category_name,
+      material_name,
       material_id,
       price,
       media_url,
@@ -91,7 +93,9 @@ exports.updateProduct = async (req, res) => {
       !product_name ||
       !category_id ||
       !material_id ||
-      !price
+      !price ||
+      !category_name ||
+      !material_name
     ) {
       return res
         .status(400)
@@ -112,6 +116,8 @@ exports.updateProduct = async (req, res) => {
       category_id,
       material_id,
       price,
+      category_name,
+      material_name,
       media_url // ✅ Pass media_url to model
     );
 

@@ -317,6 +317,8 @@ const ProductModel = {
     category_id,
     material_id,
     price,
+    category_name,
+    material_name,
     media_url
   ) => {
     const connection = await db.getConnection(); // Start transaction
@@ -367,6 +369,20 @@ const ProductModel = {
           `;
           await connection.execute(insertMediaQuery, [product_id, media_url]);
         }
+      } else if (media_url.length === 0) {
+        // ✅ Insert NULL when media_url is missing
+        const checkMediaQuery = `SELECT * FROM product_media WHERE product_id = ?`;
+        const [mediaResult] = await connection.execute(checkMediaQuery, [
+          product_id,
+        ]);
+
+        if (mediaResult.length === 0) {
+          throw new Error("Product media not found");
+        }
+
+        const updateMediaQuery = `UPDATE product_media SET url = ? WHERE product_id = ?
+      `;
+        await connection.execute(updateMediaQuery, [media_url, product_id]);
       }
 
       await connection.commit(); // ✅ Commit transaction
