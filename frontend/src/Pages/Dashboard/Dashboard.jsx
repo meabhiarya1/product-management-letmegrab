@@ -306,7 +306,6 @@ const Dashboard = () => {
     <div className="min-h-screen flex flex-col items-end p-6 bg-gray-100 ">
       {/* Navbar */}
       <Navbar handleLogout={handleLogout} />
-
       {/* Add Product */}
       <div className="w-[500px] flex justify-between items-end mt-3">
         <div
@@ -369,7 +368,6 @@ const Dashboard = () => {
           limit={limit}
         />
       </div>
-
       {/* Modal */}
       {openModal && (
         <Modal
@@ -434,17 +432,16 @@ const Dashboard = () => {
           </tbody>
         </table>
       </div>
-
       {/* Pagination */}
-      <div className="mt-4 flex gap-2">
+      <div className="mt-4 flex gap-2 items-center">
         <button
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
-          className="bg-gray-300 px-4 py-2 rounded-lg disabled:opacity-50"
+          className="bg-gray-300 rounded-lg disabled:opacity-50 h-10 items-center justify-center flex"
         >
           Prev
         </button>
-        <span className="px-4 py-2 bg-white border rounded-lg">
+        <span className="px-4 py-2 bg-white border rounded-lg h-10 items-center justify-center flex">
           Page {currentPage} of {totalPages}
         </span>
         <button
@@ -452,7 +449,7 @@ const Dashboard = () => {
             setCurrentPage((prev) => Math.min(prev + 1, totalPages))
           }
           disabled={currentPage === totalPages}
-          className="bg-gray-300 px-4 py-2 rounded-lg disabled:opacity-50"
+          className="bg-gray-300 rounded-lg disabled:opacity-50 h-10 items-center justify-center flex"
         >
           Next
         </button>
