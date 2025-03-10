@@ -389,26 +389,48 @@ const ProductModel = {
 
       // ✅ Only update category & material names if they exist
       if (category_name && material_name) {
-        const updateCategoryQuery = `
-          UPDATE category
-          SET category_name = ?
-          WHERE category_id = ?
-      `;
+        const [existingCategory] = await connection.execute(
+          `SELECT category_id FROM category WHERE category_name = ?`,
+          [category_name]
+        );
 
-        const updateMaterialQuery = `
-          UPDATE material
-          SET material_name = ?
-          WHERE material_id = ?
+        const [existingMaterial] = await connection.execute(
+          `SELECT material_id FROM material WHERE material_name = ?`,
+          [material_name]
+        );
+
+        let finalCategoryId = category_id;
+        let finalMaterialId = material_id;
+
+        if (existingCategory.length > 0) {
+          finalCategoryId = existingCategory[0].category_id;
+        } else {
+          const [categoryInsertResult] = await connection.execute(
+            `INSERT INTO category (category_name) VALUES (?)`,
+            [category_name]
+          );
+          finalCategoryId = categoryInsertResult.insertId;
+        }
+
+        if (existingMaterial.length > 0) {
+          finalMaterialId = existingMaterial[0].material_id;
+        } else {
+          const [materialInsertResult] = await connection.execute(
+            `INSERT INTO material (material_name) VALUES (?)`,
+            [material_name]
+          );
+          finalMaterialId = materialInsertResult.insertId;
+        }
+        const updateProductQuery = `
+            UPDATE product 
+            SET category_id = ?, material_id = ?
+            WHERE product_id = ?
         `;
 
-        await connection.execute(updateMaterialQuery, [
-          material_name,
-          material_id,
-        ]);
-
-        await connection.execute(updateCategoryQuery, [
-          category_name,
-          category_id,
+        await connection.execute(updateProductQuery, [
+          finalCategoryId,
+          finalMaterialId,
+          product_id,
         ]);
       }
 
@@ -456,102 +478,6 @@ const ProductModel = {
     }
   },
 
-  // ✅ Get Product Price Range
-  // getProductsByPriceRange: async (range, page = 1, limit = 10) => {
-  //   try {
-  //     const validRanges = {
-  //       "0-500": [0, 500],
-  //       "501-1000": [501, 1000],
-  //       "1000+": [1001, Number.MAX_SAFE_INTEGER],
-  //     };
-
-  //     if (!validRanges[range]) {
-  //       throw new Error("Invalid price range");
-  //     }
-
-  //     let [minPrice, maxPrice] = validRanges[range];
-
-  //     // Ensure numbers are correctly formatted
-  //     minPrice = parseFloat(minPrice);
-  //     maxPrice = parseFloat(maxPrice);
-  //     limit = parseInt(limit);
-  //     const offset = (parseInt(page) - 1) * limit;
-
-  //     console.log("Fetching products in range:", minPrice, "-", maxPrice);
-
-  //     const productQuery = `
-  //     SELECT * FROM product
-  //     WHERE price >= ? AND price <= ?
-  //     LIMIT ? OFFSET ?;
-  // `;
-
-  //     const countQuery = `
-  //     SELECT COUNT(*) AS total FROM product
-  //     WHERE price >= ? AND price <= ?;
-  // `;
-
-  //     const [[{ total }]] = await db.execute(countQuery, [minPrice, maxPrice]);
-  //     const [products] = await db.execute(productQuery, [
-  //       minPrice,
-  //       maxPrice,
-  //       limit,
-  //       offset,
-  //     ]);
-
-  //     return { products, total };
-  //   } catch (error) {
-  //     console.error("Database Error:", error.message);
-  //     throw new Error("Failed to fetch products");
-  //   }
-  // },
-  // getProductsByPriceRange: async (range, page = 1, limit = 10) => {
-  //   try {
-  //     const validRanges = {
-  //       "0-500": [0, 500],
-  //       "501-1000": [501, 1000],
-  //       "1000+": [1001, Number.MAX_SAFE_INTEGER],
-  //     };
-
-  //     if (!validRanges[range]) {
-  //       throw new Error("Invalid price range");
-  //     }
-
-  //     let [minPrice, maxPrice] = validRanges[range];
-
-  //     // Ensure numbers are correctly formatted
-  //     minPrice = parseFloat(minPrice);
-  //     maxPrice = parseFloat(maxPrice);
-  //     limit = parseInt(limit);
-  //     const offset = (parseInt(page) - 1) * limit;
-
-  //     console.log("Fetching products in range:", minPrice, "-", maxPrice);
-
-  //     const productQuery = `
-  //       SELECT * FROM product
-  //       WHERE price >= ? AND price <= ?
-  //       LIMIT ? OFFSET ?;
-  //     `;
-
-  //     const countQuery = `
-  //       SELECT COUNT(*) AS total FROM product
-  //       WHERE price >= ? AND price <= ?;
-  //     `;
-
-  //     // Execute queries with correct parameter types
-  //     const [[{ total }]] = await db.execute(countQuery, [minPrice, maxPrice]);
-  //     const [products] = await db.execute(productQuery, [
-  //       minPrice,
-  //       maxPrice,
-  //       limit, // Ensure this is an integer
-  //       offset, // Ensure this is an integer
-  //     ]);
-
-  //     return { products, total };
-  //   } catch (error) {
-  //     console.error("Database Error:", error.message);
-  //     throw new Error("Failed to fetch products");
-  //   }
-  // },
   getProductsByPriceRange: async (range, page = 1, limit = 10) => {
     try {
       const validRanges = {
