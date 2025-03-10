@@ -111,9 +111,10 @@ const ProductModel = {
       }
 
       if (filters.product_name) {
-        const nameFilter = ` AND p.product_name = ${db.escape(
-          filters.product_name + "%"
+        const nameFilter = ` AND p.product_name LIKE ${db.escape(
+          "%" + filters.product_name + "%"
         )}`;
+
         productQuery += nameFilter;
         countQuery += nameFilter;
       }
@@ -143,6 +144,7 @@ const ProductModel = {
       console.log("Executing Count Query:", countQuery);
 
       const [products] = await db.query(productQuery);
+      // console.log(products);
       const [[{ total_count }]] = await db.query(countQuery);
 
       return { products, total_count };

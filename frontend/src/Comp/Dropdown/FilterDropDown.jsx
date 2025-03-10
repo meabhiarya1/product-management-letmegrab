@@ -22,7 +22,9 @@ const FilterDropDown = ({
   const filterFun = (product, header, index) => {
     setFilterWithSubHeader({
       filterSubHeader:
-        header === "Category"
+        header === "Media_URL"
+          ? "Null"
+          : header === "Category"
           ? product.category_id
           : header === "Material"
           ? product.material_id
@@ -86,6 +88,8 @@ const FilterDropDown = ({
                           : "Null"} */}
                         {headerKeyMap[header] === "price"
                           ? priceFilter[index]
+                          : headerKeyMap[header] === "media_url"
+                          ? "Null"
                           : product[headerKeyMap[header]]}
                       </span>
                     </div>

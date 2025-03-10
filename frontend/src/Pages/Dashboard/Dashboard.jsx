@@ -64,7 +64,7 @@ const Dashboard = () => {
             },
           }
         );
-        // console.log(response.data);
+        console.log(response.data);
         setProducts(response?.data?.products);
         setTotalPages(Math.ceil(response?.data?.total_count / limit));
       } else if (filterWithSubHeader.filterHeader === "") {
@@ -157,7 +157,7 @@ const Dashboard = () => {
           }
         );
         // console.log(response?.data);
-        setProducts(response?.data?.products);
+        setProducts(response?.data);
         setTotalPages(Math.ceil(response?.data?.total_count / limit));
       }
     } catch (error) {
