@@ -90,6 +90,9 @@ exports.updateProduct = async (req, res) => {
         .status(400)
         .json({ error: "All fields are required except media_url" });
     }
+    if (typeof price !== "number" || isNaN(price) || price <= 0) {
+      return res.status(400).json({ error: "Invalid price value" });
+    }
 
     const result = await ProductModel.updateProduct(
       product_id,
@@ -138,6 +141,16 @@ exports.getCategoryWiseHighestPrice = async (req, res) => {
   }
 };
 
+// ✅ Get Products Without Media
+exports.getProductsWithoutMedia = async (req, res) => {
+  try {
+    const result = await ProductModel.getProductsWithoutMedia();
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch products without media" });
+  }
+};
+
 // ✅ Get Price Range Product Count
 exports.getProductsByPriceRange = async (req, res) => {
   try {
@@ -164,15 +177,5 @@ exports.getProductsByPriceRange = async (req, res) => {
   } catch (error) {
     console.error("Error fetching products by price range:", error);
     res.status(500).json({ error: "Failed to fetch products by price range" });
-  }
-};
-
-// ✅ Get Products Without Media
-exports.getProductsWithoutMedia = async (req, res) => {
-  try {
-    const result = await ProductModel.getProductsWithoutMedia();
-    res.status(200).json(result);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch products without media" });
   }
 };

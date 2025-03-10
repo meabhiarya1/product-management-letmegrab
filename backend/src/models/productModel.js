@@ -392,6 +392,24 @@ const ProductModel = {
     } catch (error) {
       throw error; // Handle errors properly
     }
+  }, 
+  
+  // ✅ Get Products Without Media
+  getProductsWithoutMedia: async () => {
+    try {
+      const query = `
+        SELECT p.*
+        FROM product p
+        LEFT JOIN product_media pm ON p.product_id = pm.product_id
+        WHERE pm.product_id IS NULL OR pm.url IS NULL
+      `;
+      const [products] = await db.execute(query);
+      console.log("Products without media:", products);
+      return products;
+    } catch (error) {
+      console.error("🚨 Database Query Error:", error);
+      throw new Error("Failed to fetch products without media");
+    }
   },
 
   // ✅ Get Product Price Range
@@ -439,24 +457,6 @@ const ProductModel = {
     }
   },
   // http://localhost:5000/api/products/price-range?range=0-500&page=1&limit=10
-
-  // ✅ Get Products Without Media
-  getProductsWithoutMedia: async () => {
-    try {
-      const query = `
-        SELECT p.*
-        FROM product p
-        LEFT JOIN product_media pm ON p.product_id = pm.product_id
-        WHERE pm.product_id IS NULL OR pm.url IS NULL
-      `;
-      const [products] = await db.execute(query);
-      console.log("Products without media:", products);
-      return products;
-    } catch (error) {
-      console.error("🚨 Database Query Error:", error);
-      throw new Error("Failed to fetch products without media");
-    }
-  },
 };
 
 module.exports = ProductModel;

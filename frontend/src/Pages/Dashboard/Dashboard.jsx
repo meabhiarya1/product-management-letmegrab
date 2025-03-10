@@ -162,18 +162,44 @@ const Dashboard = () => {
   // console.log(filterWithSubHeader);
 
   // Handle Add/Update
-  const handleSaveProduct = async (createdProduct) => {
+  const handleSaveProduct = async (product) => {
     setLoader(true);
     if (selectedProduct && operation === "Update") {
       // Update existing product in the list
-      setProducts(
-        products.map((p) => (p.id === createdProduct.id ? createdProduct : p))
-      );
-    } else if (createdProduct && operation === "Add") {
+      try {
+        const response = await axios.put(
+          `${import.meta.env.VITE_REACT_APP_BACKEND_URL}/api/products/${
+            product.product_id
+          }`,
+          product,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Attach token in Authorization header
+            },
+          }
+        );
+        console.log(response);
+        setProducts(
+          products.map((p) =>
+            p.product_id === product.product_id ? { ...p, ...product } : p
+          )
+        );
+
+        toast.success("Product Updated successfully");
+      } catch {
+        console.error("Error saving product:", error);
+        toast.error(error.response.data.error || "Failed to update product");
+      } finally {
+        setLoader(false);
+      }
+      setOpenModal(false); // Close modal
+      setSelectedProduct(null); // Reset selected product
+      setOperation("");
+    } else if (product && operation === "Add") {
       try {
         const response = await axios.post(
           `${import.meta.env.VITE_REACT_APP_BACKEND_URL}/api/products`,
-          createdProduct,
+          product,
           {
             headers: {
               Authorization: `Bearer ${token}`, // Attach token in Authorization header
@@ -189,9 +215,10 @@ const Dashboard = () => {
       } finally {
         setLoader(false);
       }
+      setOpenModal(false); // Close modal
+      setSelectedProduct(null); // Reset selected product
+      setOperation("");
     }
-    setOpenModal(false); // Close modal
-    setSelectedProduct(null); // Reset selected product
   };
 
   const handleDelete = async (product) => {
@@ -298,16 +325,17 @@ const Dashboard = () => {
           />
 
           <tbody className="text-gray-700">
+            {console.log(products)}
             {products?.length > 0 ? (
               products?.map((product) => (
-                <tr key={product.id} className="border-b">
-                  <td className="p-3 text-center">{product.product_id}</td>
-                  <td className="p-3 text-center">{product.product_name}</td>
-                  <td className="p-3 text-center">${product.price}</td>
-                  <td className="p-3 text-center">{product.category_name}</td>
-                  <td className="p-3 text-center">{product.material_name}</td>
-                  <td className="p-3 text-center">{product.media_url}</td>
-                  <td className="p-3 text-center">{product.SKU_VALUE}</td>
+                <tr key={product?.product_id} className="border-b">
+                  <td className="p-3 text-center">{product?.product_id}</td>
+                  <td className="p-3 text-center">{product?.product_name}</td>
+                  <td className="p-3 text-center">${product?.price}</td>
+                  <td className="p-3 text-center">{product?.category_name}</td>
+                  <td className="p-3 text-center">{product?.material_name}</td>
+                  <td className="p-3 text-center">{product?.media_url}</td>
+                  <td className="p-3 text-center">{product?.SKU_VALUE}</td>
 
                   <td className="p-3 text-center flex ">
                     <FaEdit
