@@ -6,7 +6,7 @@ const FilterDropDown = ({
   products,
   setFilterWithSubHeader,
 }) => {
-  const [activeDropdown, setActiveDropdown] = useState(null); // State to toggle dropdown
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
   const headerKeyMap = {
     "Product Name": "product_name",

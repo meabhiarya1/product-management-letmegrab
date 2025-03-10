@@ -84,7 +84,12 @@ const Login = () => {
           {loader ? <Loader /> : "Login"}
         </button>
 
-        <div className={styles["bottom-text"]}>
+        <div
+          className={styles["bottom-text"]}
+          onClick={() => {
+            toast.warn("Please read readme file on GITHUB  !!!");
+          }}
+        >
           <span>
             Don't have an account?{" "}
             <span className={styles.signup}>Sign Up</span>
