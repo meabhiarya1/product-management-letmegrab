@@ -76,10 +76,17 @@ exports.addProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     const { product_id } = req.params;
-    const { product_name, category_id, material_id, price, media_url } =
-      req.body;
+    const {
+      SKU_VALUE,
+      product_name,
+      category_id,
+      material_id,
+      price,
+      media_url,
+    } = req.body;
 
     if (
+      !SKU_VALUE ||
       !product_id ||
       !product_name ||
       !category_id ||
@@ -99,6 +106,7 @@ exports.updateProduct = async (req, res) => {
     }
 
     const result = await ProductModel.updateProduct(
+      SKU_VALUE,
       product_id,
       product_name,
       category_id,

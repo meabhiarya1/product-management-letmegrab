@@ -78,7 +78,7 @@ const Dashboard = () => {
             },
           }
         );
-        console.log(response?.data);
+        // console.log(response?.data);
         setProducts(response?.data?.products);
         setTotalPages(Math.ceil(response?.data?.total_count / limit));
       } else if (filterWithSubHeader.filterHeader === "SKU_VALUE") {
@@ -94,7 +94,7 @@ const Dashboard = () => {
             },
           }
         );
-        console.log(response?.data);
+        // console.log(response?.data);
         setProducts(response?.data?.products);
         setTotalPages(Math.ceil(response?.data?.total_count / limit));
       } else if (filterWithSubHeader.filterHeader === "category_name") {
@@ -110,7 +110,7 @@ const Dashboard = () => {
             },
           }
         );
-        console.log(response?.data);
+        // console.log(response?.data);
         setProducts(response?.data?.products);
         setTotalPages(Math.ceil(response?.data?.total_count / limit));
       } else if (filterWithSubHeader.filterHeader === "material_name") {
@@ -126,7 +126,7 @@ const Dashboard = () => {
             },
           }
         );
-        console.log(response?.data);
+        // console.log(response?.data);
         setProducts(response?.data?.products);
         setTotalPages(Math.ceil(response?.data?.total_count / limit));
       } else if (filterWithSubHeader.filterHeader === "price") {
@@ -142,7 +142,21 @@ const Dashboard = () => {
             },
           }
         );
-        console.log(response?.data);
+        // console.log(response?.data);
+        setProducts(response?.data?.products);
+        setTotalPages(Math.ceil(response?.data?.total_count / limit));
+      } else if (filterWithSubHeader.filterHeader === "media_url") {
+        const response = await axios.get(
+          `${
+            import.meta.env.VITE_REACT_APP_BACKEND_URL
+          }/api/products/without-media?page=${page}&limit=${limit}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Attach token in Authorization header
+            },
+          }
+        );
+        // console.log(response?.data);
         setProducts(response?.data?.products);
         setTotalPages(Math.ceil(response?.data?.total_count / limit));
       }
@@ -159,7 +173,7 @@ const Dashboard = () => {
     }
   };
 
-  // console.log(filterWithSubHeader);
+  console.log(filterWithSubHeader);
 
   // Handle Add/Update
   const handleSaveProduct = async (product) => {
@@ -178,7 +192,7 @@ const Dashboard = () => {
             },
           }
         );
-        console.log(response);
+        // console.log(response);
         setProducts(
           products.map((p) =>
             p.product_id === product.product_id ? { ...p, ...product } : p
@@ -205,7 +219,7 @@ const Dashboard = () => {
             },
           }
         );
-        console.log(response);
+        // console.log(response);
         setProducts([...products, response?.data?.product]);
         toast.success("Product saved successfully");
         setOpenModal(false); // Close modal
@@ -324,7 +338,6 @@ const Dashboard = () => {
           />
 
           <tbody className="text-gray-700">
-            {console.log(products)}
             {products?.length > 0 ? (
               products?.map((product) => (
                 <tr key={product?.product_id} className="border-b">

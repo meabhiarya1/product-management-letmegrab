@@ -311,6 +311,7 @@ const ProductModel = {
 
   // ✅ Update Product
   updateProduct: async (
+    SKU_VALUE,
     product_id,
     product_name,
     category_id,
@@ -325,11 +326,12 @@ const ProductModel = {
       // Update product details
       const updateProductQuery = `
         UPDATE product
-        SET product_name = ?, category_id = ?, material_id = ?, price = ?
+        SET SKU_VALUE = ?, product_name = ?, category_id = ?, material_id = ?, price = ?
         WHERE product_id = ?
       `;
 
       const [productResult] = await connection.execute(updateProductQuery, [
+        SKU_VALUE,
         product_name,
         category_id,
         material_id,
@@ -392,8 +394,8 @@ const ProductModel = {
     } catch (error) {
       throw error; // Handle errors properly
     }
-  }, 
-  
+  },
+
   // ✅ Get Products Without Media
   getProductsWithoutMedia: async () => {
     try {
