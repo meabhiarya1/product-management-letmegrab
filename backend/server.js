@@ -20,8 +20,8 @@ const createAdminUser = async () => {
     const email = "admin@gmail.com";
     const password = "123456";
 
-     // ✅ Ensure 'user' table exists before querying
-     await db.execute(`
+    // ✅ Ensure 'user' table exists before querying
+    await db.execute(`
       CREATE TABLE IF NOT EXISTS user (
         id INT AUTO_INCREMENT PRIMARY KEY,
         email VARCHAR(255) NOT NULL UNIQUE,
@@ -38,7 +38,7 @@ const createAdminUser = async () => {
 
     if (existingUsers.length > 0) {
       console.log("✅ Admin user already exists. Skipping creation.");
-      return;
+      return true;
     }
 
     // Hash password
@@ -51,8 +51,10 @@ const createAdminUser = async () => {
     );
 
     console.log("🚀 Admin user created successfully!");
+    return true;
   } catch (error) {
     console.error("❌ Error creating admin user:", error);
+    return false;
   }
 };
 // ✅ Ensure the database and tables are created before starting the server
@@ -60,7 +62,10 @@ const initializeDatabase = async () => {
   try {
     await ProductModel.createSchemaAndTables();
     // 🔥 Call createAdminUser after DB is initialized
-    await createAdminUser();
+    const res = await createAdminUser();
+    if (!res) {
+      throw new Error("Database initialization failed");
+    }
     console.log("✅ Database initialized successfully.");
   } catch (error) {
     console.error("❌ Database initialization failed:", error);
@@ -79,10 +84,14 @@ process.on("unhandledRejection", (error) => {
 });
 
 // ✅ Start the server only after DB initialization
-initializeDatabase().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server is running on http://localhost:${PORT}`);
+initializeDatabase()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is running on http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.log(err);
   });
-});
 
 module.exports = app; // Export the Express app for testing
